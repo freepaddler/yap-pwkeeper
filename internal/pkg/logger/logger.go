@@ -62,3 +62,8 @@ func SetLevel(level int) {
 	l, _ := config.Build()
 	log.SugaredLogger = l.Sugar()
 }
+
+// WithErr returns logger with passed error filed
+func (sl SLogger) WithErr(err error) SLogger {
+	return SLogger{sl.With("error", err)}
+}

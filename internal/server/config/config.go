@@ -1,6 +1,9 @@
 package config
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/alecthomas/kingpin/v2"
 )
 
@@ -9,8 +12,9 @@ const (
 )
 
 type Config struct {
-	LogLevel int8
+	LogLevel int
 	Debug    bool
+	Version  bool
 }
 
 func New() *Config {
@@ -21,9 +25,16 @@ func New() *Config {
 		Short('l').
 		Envar("LOGLEVEL").
 		Default(defaultLogLevel).
-		Int8Var(&c.LogLevel)
+		IntVar(&c.LogLevel)
 	kingpin.Flag("debug", "enable debug mode").
 		BoolVar(&c.Debug)
+	kingpin.Flag("version", "print version").Short('v').BoolVar(&c.Version)
 	kingpin.Parse()
 	return &c
+}
+
+func (c Config) Print() {
+	b, _ := json.MarshalIndent(c, "", "  ")
+	fmt.Println("Configuration:")
+	fmt.Println(string(b))
 }
