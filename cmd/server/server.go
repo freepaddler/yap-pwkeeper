@@ -6,10 +6,15 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"yap-pwkeeper/internal/app/server"
+	"yap-pwkeeper/internal/app/server/config"
+	"yap-pwkeeper/internal/app/server/grpcapi"
+	"yap-pwkeeper/internal/pkg/aaa"
 	"yap-pwkeeper/internal/pkg/logger"
-	"yap-pwkeeper/internal/server"
-	"yap-pwkeeper/internal/server/config"
+	"yap-pwkeeper/internal/pkg/mongodb"
+	"yap-pwkeeper/pkg/jwtToken"
 )
 
 var (
@@ -44,19 +49,56 @@ func main() {
 		logger.SetLevel(conf.LogLevel)
 	}
 
+	// set jwt key
+	if conf.TokenKey != "" {
+		jwtToken.SetKey(conf.TokenKey)
+	}
+
+	logger.Log().Info("starting server")
+	defer func() { logger.Log().Info("server stopped") }()
 	// notify context
 	nCtx, nStop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer nStop()
 
-	logger.Log().Info("starting server")
-	serverApp := server.New()
-	err := serverApp.Run(nCtx)
+	// connect database
+	logger.Log().Info("connecting database")
+	db, err := mongodb.New(nCtx, conf.DbUri)
+	if err != nil {
+		logger.Log().WithErr(err).Error("database setup failed")
+		exitCode = 1
+		return
+	}
+	defer func() {
+		logger.Log().Info("closing database connection")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		err := db.Close(ctx)
+		if err != nil {
+			logger.Log().WithErr(err).Warn("database connection terminated")
+			exitCode = 2
+		} else {
+			logger.Log().Info("database connection closed gracefully")
+		}
+		cancel()
+	}()
+
+	// auth controller
+	auth := aaa.New(db)
+
+	// setup grpc
+	gs := grpcapi.New(
+		grpcapi.WithAddress(conf.Address),
+		grpcapi.WithAuthHandlers(grpcapi.NewAuthHandlers(auth)),
+	)
+
+	// init and run server
+	serverApp := server.New(
+		server.WithGRPCServer(gs),
+	)
+	err = serverApp.Run(nCtx)
 	if err != nil {
 		logger.Log().WithErr(err).Error("unclean exit")
 		exitCode = 2
 	}
-	logger.Log().Info("server stopped")
-
 }
 
 func version() {

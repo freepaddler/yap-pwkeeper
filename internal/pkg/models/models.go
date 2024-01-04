@@ -9,11 +9,6 @@ const (
 
 type ItemType string
 
-type LoginRequest struct {
-	Login    string
-	Password string
-}
-
 type AuthToken string
 
 type MetaItem struct {

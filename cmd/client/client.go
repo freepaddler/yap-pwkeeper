@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"yap-pwkeeper/internal/client"
+	"yap-pwkeeper/internal/app/client"
 )
 
 func main() {
