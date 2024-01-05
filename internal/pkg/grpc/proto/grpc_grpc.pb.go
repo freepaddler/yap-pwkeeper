@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.1
-// source: internal/pkg/grpc/proto/auth.proto
+// source: internal/pkg/grpc/proto/grpc.proto
 
 package proto
 
@@ -179,5 +179,95 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/pkg/grpc/proto/auth.proto",
+	Metadata: "internal/pkg/grpc/proto/grpc.proto",
+}
+
+const (
+	Wallet_AddNote_FullMethodName = "/grpcapi.Wallet/AddNote"
+)
+
+// WalletClient is the client API for Wallet service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type WalletClient interface {
+	AddNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type walletClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewWalletClient(cc grpc.ClientConnInterface) WalletClient {
+	return &walletClient{cc}
+}
+
+func (c *walletClient) AddNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Wallet_AddNote_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// WalletServer is the server API for Wallet service.
+// All implementations must embed UnimplementedWalletServer
+// for forward compatibility
+type WalletServer interface {
+	AddNote(context.Context, *Note) (*Empty, error)
+	mustEmbedUnimplementedWalletServer()
+}
+
+// UnimplementedWalletServer must be embedded to have forward compatible implementations.
+type UnimplementedWalletServer struct {
+}
+
+func (UnimplementedWalletServer) AddNote(context.Context, *Note) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddNote not implemented")
+}
+func (UnimplementedWalletServer) mustEmbedUnimplementedWalletServer() {}
+
+// UnsafeWalletServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to WalletServer will
+// result in compilation errors.
+type UnsafeWalletServer interface {
+	mustEmbedUnimplementedWalletServer()
+}
+
+func RegisterWalletServer(s grpc.ServiceRegistrar, srv WalletServer) {
+	s.RegisterService(&Wallet_ServiceDesc, srv)
+}
+
+func _Wallet_AddNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Note)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServer).AddNote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Wallet_AddNote_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServer).AddNote(ctx, req.(*Note))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Wallet_ServiceDesc is the grpc.ServiceDesc for Wallet service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Wallet_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "grpcapi.Wallet",
+	HandlerType: (*WalletServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddNote",
+			Handler:    _Wallet_AddNote_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "internal/pkg/grpc/proto/grpc.proto",
 }

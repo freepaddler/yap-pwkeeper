@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package grpcapi;
+
+//protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative internal/pkg/grpc/proto/grpc.proto
+option go_package = "grpc/proto";
+
+message Empty {}
+
+message LoginCredentials {
+  string login = 1;
+  string password = 2;
+}
+
+message Token {
+  string token = 1;
+}
+
+message Meta {
+  string key = 1;
+  string value = 2;
+}
+
+message Note {
+  string id = 1;
+  string name = 2;
+  repeated Meta metadata = 3;
+  string text = 4;
+}
+
+service Auth {
+  rpc Register(LoginCredentials) returns (Token);
+  rpc Login(LoginCredentials) returns (Token);
+  rpc Refresh(Token) returns (Token);
+}
+
+service Wallet {
+  rpc AddNote(Note) returns (Empty);
+}

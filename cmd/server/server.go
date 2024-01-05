@@ -14,6 +14,7 @@ import (
 	"yap-pwkeeper/internal/pkg/aaa"
 	"yap-pwkeeper/internal/pkg/logger"
 	"yap-pwkeeper/internal/pkg/mongodb"
+	"yap-pwkeeper/internal/pkg/wallet"
 	"yap-pwkeeper/pkg/jwtToken"
 )
 
@@ -81,13 +82,50 @@ func main() {
 		cancel()
 	}()
 
+	// TEST START
+	//note := models.Note{}
+	////note.Id = ""
+	//note.Name = "new"
+	//note.Text = "some note text"
+	//note.Metadata = []models.Meta{
+	//	{Key: "key4", Value: "что-то новое"},
+	//	{Key: "key1", Value: "value1"},
+	//}
+	//
+	//	//Id:     "6596ff1efbaebdda67c12fea",
+	//	UserId: "1231241",
+	//	Name:   "newNote",
+	//	Text:   "updated note text2",
+	//	Metadata: []models.Meta{
+	//		{Key: "key4", Value: "что-то новое"},
+	//		{Key: "key1", Value: "value1"},
+	//	},
+	//	Entity: models.Entity{
+	//		CreatedAt:  time.Now(),
+	//		ModifiedAt: time.Now(),
+	//		State:      models.StateActive,
+	//	},
+	//}
+	////err = db.ReplaceNote(context.Background(), note)
+	////err = db.AddNote(context.Background(), note)
+	//err = db.DelNote(context.Background(), "6596ff1efbaebdda67c12fea")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//return
+	// TEST END
+
 	// auth controller
 	auth := aaa.New(db)
+
+	// wallet controller
+	docs := wallet.New(db)
 
 	// setup grpc
 	gs := grpcapi.New(
 		grpcapi.WithAddress(conf.Address),
 		grpcapi.WithAuthHandlers(grpcapi.NewAuthHandlers(auth)),
+		grpcapi.WithWalletHandlers(grpcapi.NewDocsHandlers(docs)),
 	)
 
 	// init and run server

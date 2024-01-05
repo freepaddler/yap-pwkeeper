@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/alecthomas/kingpin/v2"
 	"google.golang.org/grpc"
@@ -15,6 +16,16 @@ var (
 	user, password, jwt string
 	conn                *grpc.ClientConn
 	auth                proto.AuthClient
+	wallet              proto.WalletClient
+	name, text          string
+	meta1               proto.Meta = proto.Meta{
+		Key:   "key1",
+		Value: "value1",
+	}
+	meta2 proto.Meta = proto.Meta{
+		Key:   "key2",
+		Value: "value2",
+	}
 )
 
 func main() {
@@ -22,6 +33,8 @@ func main() {
 	kingpin.Flag("user", "user").Short('u').StringVar(&user)
 	kingpin.Flag("password", "password").Short('p').StringVar(&password)
 	kingpin.Flag("jwt", "token").Short('j').StringVar(&jwt)
+	kingpin.Flag("name", "document name").Short('n').StringVar(&name)
+	kingpin.Flag("text", "text").Short('t').StringVar(&text)
 	kingpin.Arg("command", "command").Required().StringVar(&command)
 	kingpin.Parse()
 	var err error
@@ -34,6 +47,7 @@ func main() {
 	}
 	defer conn.Close()
 	auth = proto.NewAuthClient(conn)
+	wallet = proto.NewWalletClient(conn)
 
 	switch command {
 	case "login":
@@ -42,6 +56,8 @@ func main() {
 		register()
 	case "refresh":
 		refresh()
+	case "addnote":
+		addNote()
 	}
 }
 
@@ -79,4 +95,18 @@ func refresh() {
 		panic(err)
 	}
 	fmt.Println(token.Token)
+}
+
+func addNote() {
+	fmt.Println("ADD NOTE")
+
+	req := &proto.Note{
+		Name:     name,
+		Metadata: []*proto.Meta{&meta1, &meta2},
+		Text:     text,
+	}
+	_, err := wallet.AddNote(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -23,3 +23,25 @@ func (sl SLogger) WithCtxRequestId(ctx context.Context) SLogger {
 	}
 	return sl
 }
+
+type ctxUserId struct{} // reqId in context
+
+// WithUserId returns context with userId value
+func WithUserId(ctx context.Context, userId string) context.Context {
+	return context.WithValue(ctx, ctxUserId{}, userId)
+}
+
+// GetUserId returns userId from context
+func GetUserId(ctx context.Context) (userId string, ok bool) {
+	userId, ok = ctx.Value(ctxUserId{}).(string)
+	return
+}
+
+// WithCtxUserId returns logger with userId field from logger
+func (sl SLogger) WithCtxUserId(ctx context.Context) SLogger {
+	userId, ok := GetUserId(ctx)
+	if ok {
+		return SLogger{sl.With("userId", userId)}
+	}
+	return sl
+}

@@ -16,13 +16,13 @@ type MetaItem struct {
 	value string
 }
 
-type Meta []MetaItem
+type MetaQ []MetaItem
 
 type NoteItem struct {
 	Id   string
 	Name string
 	Text string
-	Meta
+	MetaQ
 }
 
 type LoginItem struct {
@@ -30,18 +30,18 @@ type LoginItem struct {
 	Name     string
 	Login    string
 	Password string
-	Meta
+	MetaQ
 }
 
-func (li *LoginItem) Item() Item {
-	return Item{
+func (li *LoginItem) Item() ItemQ {
+	return ItemQ{
 		Id:   li.Id,
 		Name: li.Name,
 		Type: ItemTypeLogin,
 	}
 }
 
-type Item struct {
+type ItemQ struct {
 	Id   string
 	Name string
 	Type ItemType
@@ -56,7 +56,7 @@ func (w *Wallet) GetCategories() []ItemType {
 	return []ItemType{ItemTypeNote, ItemTypeLogin}
 }
 
-func (w *Wallet) GetCategoryItems(itemType ItemType) []Item {
+func (w *Wallet) GetCategoryItems(itemType ItemType) []ItemQ {
 	switch itemType {
 	default:
 		return nil

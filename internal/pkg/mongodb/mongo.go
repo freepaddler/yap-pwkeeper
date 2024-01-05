@@ -11,15 +11,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"yap-pwkeeper/internal/pkg/aaa"
 	"yap-pwkeeper/internal/pkg/logger"
-	"yap-pwkeeper/internal/pkg/models"
 )
 
 const (
 	connTimeout time.Duration = 5 * time.Second
 	dbName                    = "pwkeeper"
-	collUsers                 = "aaa"
+	collUsers                 = "users"
+	collNotes                 = "notes"
+)
+
+var (
+	ErrBadId    = errors.New("invalid documentId")
+	ErrNotFound = errors.New("document not found")
 )
 
 type Mongodb struct {
@@ -27,6 +31,7 @@ type Mongodb struct {
 	client *mongo.Client
 }
 
+// TODO add timeout to opts
 func New(ctx context.Context, uri string, opts ...func(db *Mongodb)) (*Mongodb, error) {
 	db := new(Mongodb)
 	var err error
@@ -42,37 +47,6 @@ func New(ctx context.Context, uri string, opts ...func(db *Mongodb)) (*Mongodb, 
 
 func (db *Mongodb) Close(ctx context.Context) error {
 	return db.client.Disconnect(ctx)
-}
-
-// AddUser creates new user in database, returns user with new id
-func (db *Mongodb) AddUser(ctx context.Context, user models.User) (models.User, error) {
-	coll := db.client.Database(dbName).Collection(collUsers)
-	res, err := coll.InsertOne(ctx, user)
-	if err != nil {
-		if mongo.IsDuplicateKeyError(err) {
-			return user, aaa.ErrDuplicate
-		}
-		return user, err
-	}
-	user.Id, err = oid2string(res.InsertedID)
-	return user, err
-}
-
-// GetUserByLogin returns active user by specified login
-func (db *Mongodb) GetUserByLogin(ctx context.Context, login string) (models.User, error) {
-	var user models.User
-	coll := db.client.Database(dbName).Collection(collUsers)
-	err := coll.FindOne(ctx,
-		bson.D{
-			{"login", login},
-			{"state", models.StateActive},
-		}).Decode(&user)
-	if err != nil {
-		if errors.Is(mongo.ErrNoDocuments, err) {
-			err = aaa.ErrNotFound
-		}
-	}
-	return user, err
 }
 
 // createIndexes creates database indexes

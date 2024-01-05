@@ -7,7 +7,7 @@ var Store Wallet = Wallet{
 			Name:     "name1",
 			Login:    "login1",
 			Password: "password1",
-			Meta: Meta{
+			MetaQ: MetaQ{
 				MetaItem{
 					key:   "key1",
 					value: "value1",
@@ -23,7 +23,7 @@ var Store Wallet = Wallet{
 			Name:     "name2",
 			Login:    "login2",
 			Password: "password2",
-			Meta: Meta{
+			MetaQ: MetaQ{
 				MetaItem{
 					key:   "key1",
 					value: "value1",
@@ -37,16 +37,16 @@ var Store Wallet = Wallet{
 	},
 	Note: []NoteItem{
 		{
-			Id:   "3",
-			Name: "name3",
-			Text: "this is a text3 text",
-			Meta: nil,
+			Id:    "3",
+			Name:  "name3",
+			Text:  "this is a text3 text",
+			MetaQ: nil,
 		},
 		{
 			Id:   "4",
 			Name: "name4",
 			Text: "this is a text4 text",
-			Meta: Meta{
+			MetaQ: MetaQ{
 				MetaItem{
 					key:   "metakey",
 					value: "metavalue",
