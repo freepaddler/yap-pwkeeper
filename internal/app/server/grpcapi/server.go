@@ -42,6 +42,7 @@ func New(opts ...func(gs *GRCPServer)) *GRCPServer {
 	)
 	gs.streamInterceptors = append(
 		gs.streamInterceptors,
+		interceptors.ReqIdStreamServer,
 		logging.StreamServerInterceptor(interceptors.ZapLogger(logger.Log().Desugar()), logOpts...),
 	)
 	for _, o := range opts {

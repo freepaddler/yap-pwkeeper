@@ -97,7 +97,8 @@ func Valid(signed string) bool {
 func getClaims(token string) (*JWTClaims, error) {
 	parsed, _, err := jwt.NewParser().ParseUnverified(token, &JWTClaims{})
 	if err != nil {
-		logger.Log().WithErr(err).Error("token claims parse failed")
+		logger.Log().WithErr(err).Debug("token claims parse failed")
+		return nil, err
 	}
 	return parsed.Claims.(*JWTClaims), err
 }
@@ -116,4 +117,12 @@ func GetTokenSession(token string) string {
 		return ""
 	}
 	return claims.Session
+}
+
+func GetTokenExpire(token string) (time.Time, error) {
+	claims, err := getClaims(token)
+	if err != nil {
+		return time.UnixMilli(0), err
+	}
+	return claims.ExpiresAt.Time, err
 }

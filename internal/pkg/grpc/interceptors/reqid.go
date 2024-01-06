@@ -12,7 +12,23 @@ import (
 
 const requestIdHeader = "request-id"
 
-func ReqIdUnaryServer(ctx context.Context, req interface{}, si *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func ReqIdStreamServer(srv interface{}, stream grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	ctx, mdOut := setReqId(stream.Context())
+	if err := grpc.SetHeader(ctx, mdOut); err != nil {
+		logger.Log().WithErr(err).WithCtxRequestId(ctx).Error("failed to set grpc headers")
+	}
+	return handler(srv, &serverStreamWrapped{stream, ctx})
+}
+
+func ReqIdUnaryServer(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	ctx, mdOut := setReqId(ctx)
+	if err := grpc.SetHeader(ctx, mdOut); err != nil {
+		logger.Log().WithErr(err).Error("failed to set grpc headers")
+	}
+	return handler(ctx, req)
+}
+
+func setReqId(ctx context.Context) (context.Context, metadata.MD) {
 	var requestId string
 	// try to get requestId from request
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -41,9 +57,5 @@ func ReqIdUnaryServer(ctx context.Context, req interface{}, si *grpc.UnaryServer
 
 	// append same requestId to response
 	mdOut := metadata.New(map[string]string{requestIdHeader: requestId})
-	if err := grpc.SetHeader(ctx, mdOut); err != nil {
-		logger.Log().WithErr(err).Error("failed to set grpc headers")
-	}
-
-	return handler(ctx, req)
+	return ctx, mdOut
 }

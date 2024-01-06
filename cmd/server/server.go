@@ -55,6 +55,7 @@ func main() {
 	// set jwt key
 	if conf.TokenKey != "" {
 		jwtToken.SetKey(conf.TokenKey)
+		jwtToken.SetTTL(2*time.Minute + 10*time.Second)
 	}
 
 	logger.Log().Info("starting server")
@@ -98,6 +99,7 @@ func main() {
 	gs := grpcapi.New(
 		grpcapi.WithAddress(conf.Address),
 		grpcapi.WithUnaryInterceptors(interceptors.AuthUnaryServer(auth.Validate, "Wallet/")),
+		grpcapi.WithStreamInterceptors(interceptors.AuthStreamServer(auth.Validate, "Wallet/")),
 		grpcapi.WithAuthHandlers(grpcapi.NewAuthHandlers(auth)),
 		grpcapi.WithDocsHandlers(grpcapi.NewDocsHandlers(docs)),
 	)

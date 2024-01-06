@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/alecthomas/kingpin/v2"
@@ -50,7 +51,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 	auth = proto.NewAuthClient(conn)
 	wallet = proto.NewWalletClient(conn)
 
@@ -71,8 +72,62 @@ func main() {
 		addCard()
 	case "addcred":
 		addCred()
+	case "get":
+		getUpdate()
+	case "getStream":
+		getUpdateStream()
 	}
 
+}
+
+func getUpdateStream() {
+	fmt.Println("UPDATE STREAM")
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
+	req := &proto.UpdateRequest{Serial: int64(-1)}
+	stream, err := wallet.GetUpdate(ctx, req)
+	if err != nil {
+		fmt.Println("error ", err)
+		return
+	}
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			fmt.Println("end of stream")
+			return
+		}
+		if err != nil {
+			fmt.Println("instream error: ", err)
+			return
+		}
+		switch update := msg.Update.(type) {
+		case *proto.UpdateResponse_Note:
+			note := update.Note
+			fmt.Println("note: ", note)
+		case *proto.UpdateResponse_Credential:
+			cred := update.Credential
+			fmt.Println("cred: ", cred)
+		}
+	}
+}
+
+func getUpdate() {
+	fmt.Println("UPDATE")
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
+	req := &proto.UpdateRequest{Serial: int64(-1)}
+	response, err := wallet.GetUpdates(ctx, req)
+	if err != nil {
+		fmt.Println("error ", err)
+	} else {
+		switch response.Update.(type) {
+		case *proto.UpdateResponse_Note:
+			fmt.Println("update type is note")
+			note, ok := response.Update.(*proto.UpdateResponse_Note)
+			fmt.Println("ok: ", ok)
+			fmt.Println("note: ", note)
+		default:
+			fmt.Println("unknown update type")
+		}
+	}
 }
 
 func login() {

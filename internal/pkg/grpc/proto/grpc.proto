@@ -53,6 +53,16 @@ message Card {
   string code = 10;
 }
 
+message UpdateRequest {
+  int64 serial = 1;
+}
+
+message UpdateResponse {
+  oneof update {
+    Note note = 1;
+    Credential credential = 2;
+  }
+}
 
 service Auth {
   rpc Register(LoginCredentials) returns (Token);
@@ -61,6 +71,9 @@ service Auth {
 }
 
 service Wallet {
+  rpc GetUpdates(UpdateRequest) returns (UpdateResponse);
+  rpc GetUpdate(UpdateRequest) returns (stream UpdateResponse);
+
   rpc AddNote(Note) returns (Empty);
   rpc DeleteNote(Note) returns (Empty);
   rpc UpdateNote(Note) returns (Empty);
