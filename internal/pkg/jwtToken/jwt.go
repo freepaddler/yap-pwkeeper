@@ -74,13 +74,13 @@ func NewToken(subject string) (string, error) {
 }
 
 func RefreshToken(token string) (string, error) {
-	if !ValidateToken(token) {
+	if !Valid(token) {
 		return "", ErrInvalid
 	}
 	return genToken(GetTokenSubject(token), GetTokenSession(token))
 }
 
-func ValidateToken(signed string) bool {
+func Valid(signed string) bool {
 	token, err := jwt.ParseWithClaims(signed, &JWTClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil

@@ -19,8 +19,6 @@ var (
 	ErrToken     = errors.New("token generation failed")
 )
 
-var ()
-
 type UserStorage interface {
 	AddUser(ctx context.Context, user models.User) (models.User, error)
 	GetUserByLogin(ctx context.Context, login string) (models.User, error)
@@ -107,6 +105,6 @@ func (c *Controller) Refresh(ctx context.Context, token string) (string, error) 
 	return newToken, err
 }
 
-func (c *Controller) Validate(token string) bool {
-	return jwtToken.ValidateToken(token)
+func (c *Controller) Validate(_ context.Context, token string) bool {
+	return jwtToken.Valid(token)
 }

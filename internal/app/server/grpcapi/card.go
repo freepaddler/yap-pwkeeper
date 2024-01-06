@@ -14,7 +14,7 @@ func (w DocsHandlers) AddCard(ctx context.Context, in *proto.Card) (*proto.Empty
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add card request")
 	card, err := in.ToCard()
-	card.UserId = "userId" //TODO: delete
+	card.UserId, _ = logger.GetUserId(ctx)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
@@ -31,7 +31,7 @@ func (w DocsHandlers) DeleteCard(ctx context.Context, in *proto.Card) (*proto.Em
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
-	card.UserId = "userId" //TODO: delete
+	card.UserId, _ = logger.GetUserId(ctx)
 	if err := w.docs.DeleteCard(ctx, card); err != nil {
 		return nil, respErr(ctx, err)
 	}
@@ -45,7 +45,7 @@ func (w DocsHandlers) UpdateCard(ctx context.Context, in *proto.Card) (*proto.Em
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
-	card.UserId = "userId" //TODO: delete
+	card.UserId, _ = logger.GetUserId(ctx)
 	if err := w.docs.UpdateCard(ctx, card); err != nil {
 		return nil, respErr(ctx, err)
 	}

@@ -25,8 +25,8 @@ const (
 )
 
 var (
-	ErrBadId  = errors.New("invalid documentId")
-	ErrBadDoc = errors.New("requested and returned document models do not match")
+	ErrBadId = errors.New("invalid documentId")
+	//ErrBadDoc = errors.New("requested and returned document models do not match")
 )
 
 type Mongodb struct {

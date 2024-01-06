@@ -14,7 +14,7 @@ func (w DocsHandlers) AddNote(ctx context.Context, in *proto.Note) (*proto.Empty
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add note request")
 	note, err := in.ToNote()
-	note.UserId = "userId" //TODO: delete
+	note.UserId, _ = logger.GetUserId(ctx)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
@@ -31,7 +31,7 @@ func (w DocsHandlers) DeleteNote(ctx context.Context, in *proto.Note) (*proto.Em
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
-	note.UserId = "userId" //TODO: delete
+	note.UserId, _ = logger.GetUserId(ctx)
 	if err := w.docs.DeleteNote(ctx, note); err != nil {
 		return nil, respErr(ctx, err)
 	}
@@ -45,7 +45,7 @@ func (w DocsHandlers) UpdateNote(ctx context.Context, in *proto.Note) (*proto.Em
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
-	note.UserId = "userId" //TODO: delete
+	note.UserId, _ = logger.GetUserId(ctx)
 	if err := w.docs.UpdateNote(ctx, note); err != nil {
 		return nil, respErr(ctx, err)
 	}

@@ -14,6 +14,7 @@ import (
 	"yap-pwkeeper/internal/app/server/grpcapi"
 	"yap-pwkeeper/internal/app/server/serial"
 	"yap-pwkeeper/internal/app/server/wallet"
+	"yap-pwkeeper/internal/pkg/grpc/interceptors"
 	"yap-pwkeeper/internal/pkg/jwtToken"
 	"yap-pwkeeper/internal/pkg/logger"
 	"yap-pwkeeper/internal/pkg/mongodb"
@@ -96,6 +97,7 @@ func main() {
 	// setup grpc
 	gs := grpcapi.New(
 		grpcapi.WithAddress(conf.Address),
+		grpcapi.WithUnaryInterceptors(interceptors.AuthUnaryServer(auth.Validate, "Wallet/")),
 		grpcapi.WithAuthHandlers(grpcapi.NewAuthHandlers(auth)),
 		grpcapi.WithDocsHandlers(grpcapi.NewDocsHandlers(docs)),
 	)

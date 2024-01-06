@@ -8,6 +8,7 @@ import (
 	"github.com/alecthomas/kingpin/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 
 	"yap-pwkeeper/internal/pkg/grpc/proto"
 )
@@ -33,7 +34,7 @@ func main() {
 	var command string
 	kingpin.Flag("user", "user").Short('u').StringVar(&user)
 	kingpin.Flag("password", "password").Short('p').StringVar(&password)
-	kingpin.Flag("jwt", "token").Short('j').StringVar(&jwt)
+	kingpin.Flag("jwt", "token").Envar("TOKEN").Short('j').StringVar(&jwt)
 	kingpin.Flag("name", "document name").Short('n').StringVar(&name)
 	kingpin.Flag("text", "text").Short('t').StringVar(&text)
 	kingpin.Flag("serial", "serial").Short('s').Int64Var(&serial)
@@ -172,13 +173,13 @@ func addCard() {
 
 func addCred() {
 	fmt.Println("ADD CRED")
-
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
 	req := &proto.Credential{
 		Name:     name,
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Password: password,
 	}
-	_, err := wallet.AddCredential(context.Background(), req)
+	_, err := wallet.AddCredential(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}

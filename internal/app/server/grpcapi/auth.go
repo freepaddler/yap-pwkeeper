@@ -18,6 +18,7 @@ type AAA interface {
 	Register(ctx context.Context, cred models.UserCredentials) (string, error)
 	Login(ctx context.Context, cred models.UserCredentials) (string, error)
 	Refresh(ctx context.Context, token string) (string, error)
+	Validate(ctx context.Context, token string) bool
 }
 
 type AuthHandlers struct {

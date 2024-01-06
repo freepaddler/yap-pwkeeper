@@ -12,9 +12,8 @@ import (
 
 const requestIdHeader = "request-id"
 
-func ReqIdUnaryServer(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func ReqIdUnaryServer(ctx context.Context, req interface{}, si *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	var requestId string
-
 	// try to get requestId from request
 	md, ok := metadata.FromIncomingContext(ctx)
 	if ok && md.Len() > 0 {

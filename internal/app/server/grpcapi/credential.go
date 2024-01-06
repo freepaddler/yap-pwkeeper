@@ -14,7 +14,7 @@ func (w DocsHandlers) AddCredential(ctx context.Context, in *proto.Credential) (
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add credential request")
 	credential, err := in.ToCredential()
-	credential.UserId = "userId" //TODO: delete
+	credential.UserId, _ = logger.GetUserId(ctx)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
@@ -31,7 +31,7 @@ func (w DocsHandlers) DeleteCredential(ctx context.Context, in *proto.Credential
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
-	credential.UserId = "userId" //TODO: delete
+	credential.UserId, _ = logger.GetUserId(ctx)
 	if err := w.docs.DeleteCredential(ctx, credential); err != nil {
 		return nil, respErr(ctx, err)
 	}
@@ -45,7 +45,7 @@ func (w DocsHandlers) UpdateCredential(ctx context.Context, in *proto.Credential
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request data")
 	}
-	credential.UserId = "userId" //TODO: delete
+	credential.UserId, _ = logger.GetUserId(ctx)
 	if err := w.docs.UpdateCredential(ctx, credential); err != nil {
 		return nil, respErr(ctx, err)
 	}
