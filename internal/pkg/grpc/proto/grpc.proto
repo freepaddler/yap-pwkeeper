@@ -23,10 +23,36 @@ message Meta {
 
 message Note {
   string id = 1;
-  string name = 2;
-  repeated Meta metadata = 3;
-  string text = 4;
+  int64 serial = 2;
+  string state = 3;
+  string name = 4;
+  repeated Meta metadata = 5;
+  string text = 6;
 }
+
+message Credential {
+  string id = 1;
+  int64 serial = 2;
+  string state = 3;
+  string name = 4;
+  repeated Meta metadata = 5;
+  string login = 6;
+  string password = 7;
+}
+
+message Card {
+  string id = 1;
+  int64 serial = 2;
+  string state = 3;
+  string name = 4;
+  repeated Meta metadata = 5;
+  string cardholder = 6;
+  string number = 7;
+  string expires = 8;
+  string pin = 9;
+  string code = 10;
+}
+
 
 service Auth {
   rpc Register(LoginCredentials) returns (Token);
@@ -36,4 +62,14 @@ service Auth {
 
 service Wallet {
   rpc AddNote(Note) returns (Empty);
+  rpc DeleteNote(Note) returns (Empty);
+  rpc UpdateNote(Note) returns (Empty);
+
+  rpc AddCredential(Credential) returns (Empty);
+  rpc DeleteCredential(Credential) returns (Empty);
+  rpc UpdateCredential(Credential) returns (Empty);
+
+  rpc AddCard(Card) returns (Empty);
+  rpc DeleteCard(Card) returns (Empty);
+  rpc UpdateCard(Card) returns (Empty);
 }

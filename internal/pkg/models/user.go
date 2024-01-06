@@ -1,14 +1,15 @@
 package models
 
+// UserCredentials are user login and password to register and login
+type UserCredentials struct {
+	Login    string
+	Password string
+}
+
+// User is user storage implementation
 type User struct {
 	Id           string `bson:"_id,omitempty"`
 	Login        string `bson:"login"`
 	PasswordHash string `bson:"password"`
-	Entity       `bson:"inline"`
-}
-
-// UserCredentials are aaa login and password
-type UserCredentials struct {
-	Login    string
-	Password string
+	State        string `bson:"state"`
 }

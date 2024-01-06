@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"yap-pwkeeper/internal/pkg/aaa"
+	"yap-pwkeeper/internal/app/server/aaa"
 	"yap-pwkeeper/internal/pkg/models"
 )
 

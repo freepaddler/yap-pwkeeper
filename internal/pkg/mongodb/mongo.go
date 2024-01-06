@@ -15,15 +15,18 @@ import (
 )
 
 const (
-	connTimeout time.Duration = 5 * time.Second
-	dbName                    = "pwkeeper"
-	collUsers                 = "users"
-	collNotes                 = "notes"
+	connTimeout     time.Duration = 5 * time.Second
+	dbName                        = "pwkeeper"
+	collUsers                     = "users"
+	collSerials                   = "serial"
+	collNotes                     = "notes"
+	collCredentials               = "credentials"
+	collCards                     = "cards"
 )
 
 var (
-	ErrBadId    = errors.New("invalid documentId")
-	ErrNotFound = errors.New("document not found")
+	ErrBadId  = errors.New("invalid documentId")
+	ErrBadDoc = errors.New("requested and returned document models do not match")
 )
 
 type Mongodb struct {
@@ -51,7 +54,7 @@ func (db *Mongodb) Close(ctx context.Context) error {
 
 // createIndexes creates database indexes
 func (db *Mongodb) createIndexes(ctx context.Context) error {
-	// unique index login@Users
+	// unique index login @users
 	coll := db.client.Database(dbName).Collection(collUsers)
 	userLogin := mongo.IndexModel{
 		Keys:    bson.D{{"login", 1}},
@@ -67,7 +70,7 @@ func (db *Mongodb) createIndexes(ctx context.Context) error {
 
 func oid2string(oid interface{}) (string, error) {
 	if id, ok := oid.(primitive.ObjectID); !ok {
-		return "", errors.New("failed to get id from oid")
+		return "", ErrBadId
 	} else {
 		return id.Hex(), nil
 	}

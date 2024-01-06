@@ -1,9 +1,15 @@
 package grpcapi
 
 import (
+	"context"
+	"errors"
+
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
+	"yap-pwkeeper/internal/app/server/wallet"
 	"yap-pwkeeper/internal/pkg/grpc/interceptors"
 	pb "yap-pwkeeper/internal/pkg/grpc/proto"
 	"yap-pwkeeper/internal/pkg/logger"
@@ -62,7 +68,7 @@ func WithAuthHandlers(h *AuthHandlers) func(gs *GRCPServer) {
 	}
 }
 
-func WithWalletHandlers(h *DocsHandlers) func(gs *GRCPServer) {
+func WithDocsHandlers(h *DocsHandlers) func(gs *GRCPServer) {
 	return func(gs *GRCPServer) {
 		gs.wallet = h
 	}
@@ -79,5 +85,22 @@ func WithStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) func(s
 	return func(gs *GRCPServer) {
 		// order makes sense
 		gs.streamInterceptors = append(gs.streamInterceptors, interceptors...)
+	}
+}
+
+// respErr returns grpc error response
+func respErr(ctx context.Context, err error) error {
+	switch {
+	case errors.Is(wallet.ErrBadRequest, err):
+		return status.Error(codes.InvalidArgument, wallet.ErrBadRequest.Error())
+	case errors.Is(wallet.ErrChanged, err):
+		return status.Error(codes.FailedPrecondition, wallet.ErrChanged.Error())
+	case errors.Is(wallet.ErrDeleted, err):
+		return status.Error(codes.FailedPrecondition, wallet.ErrDeleted.Error())
+	case errors.Is(wallet.ErrNotFound, err):
+		return status.Error(codes.NotFound, wallet.ErrNotFound.Error())
+	default:
+		logger.Log().WithErr(err).WithCtxRequestId(ctx).Error("server error")
+		return status.Error(codes.Internal, "server error")
 	}
 }

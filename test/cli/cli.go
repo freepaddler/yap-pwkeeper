@@ -13,12 +13,13 @@ import (
 )
 
 var (
-	user, password, jwt string
-	conn                *grpc.ClientConn
-	auth                proto.AuthClient
-	wallet              proto.WalletClient
-	name, text          string
-	meta1               proto.Meta = proto.Meta{
+	user, password, jwt     string
+	conn                    *grpc.ClientConn
+	auth                    proto.AuthClient
+	wallet                  proto.WalletClient
+	name, text, id, expires string
+	serial                  int64
+	meta1                   proto.Meta = proto.Meta{
 		Key:   "key1",
 		Value: "value1",
 	}
@@ -35,6 +36,9 @@ func main() {
 	kingpin.Flag("jwt", "token").Short('j').StringVar(&jwt)
 	kingpin.Flag("name", "document name").Short('n').StringVar(&name)
 	kingpin.Flag("text", "text").Short('t').StringVar(&text)
+	kingpin.Flag("serial", "serial").Short('s').Int64Var(&serial)
+	kingpin.Flag("id", "id").Short('i').StringVar(&id)
+	kingpin.Flag("expires", "expires").Short('e').StringVar(&expires)
 	kingpin.Arg("command", "command").Required().StringVar(&command)
 	kingpin.Parse()
 	var err error
@@ -58,7 +62,16 @@ func main() {
 		refresh()
 	case "addnote":
 		addNote()
+	case "delnote":
+		delNote()
+	case "updnote":
+		updNote()
+	case "addcard":
+		addCard()
+	case "addcred":
+		addCred()
 	}
+
 }
 
 func login() {
@@ -106,6 +119,66 @@ func addNote() {
 		Text:     text,
 	}
 	_, err := wallet.AddNote(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func delNote() {
+	fmt.Println("DEL NOTE")
+
+	req := &proto.Note{
+		Id:       id,
+		Serial:   serial,
+		Name:     name,
+		Metadata: []*proto.Meta{&meta1, &meta2},
+		Text:     text,
+	}
+	_, err := wallet.DeleteNote(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func updNote() {
+	fmt.Println("MOD NOTE")
+
+	req := &proto.Note{
+		Id:       id,
+		Serial:   serial,
+		Name:     name,
+		Metadata: []*proto.Meta{&meta1, &meta2},
+		Text:     text,
+	}
+	_, err := wallet.UpdateNote(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func addCard() {
+	fmt.Println("ADD CARD")
+
+	req := &proto.Card{
+		Name:     name,
+		Metadata: []*proto.Meta{&meta1, &meta2},
+		Expires:  expires,
+	}
+	_, err := wallet.AddCard(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func addCred() {
+	fmt.Println("ADD CRED")
+
+	req := &proto.Credential{
+		Name:     name,
+		Metadata: []*proto.Meta{&meta1, &meta2},
+		Password: password,
+	}
+	_, err := wallet.AddCredential(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

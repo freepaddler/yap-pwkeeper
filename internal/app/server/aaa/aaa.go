@@ -3,21 +3,23 @@ package aaa
 import (
 	"context"
 	"errors"
-	"time"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"yap-pwkeeper/internal/pkg/jwtToken"
 	"yap-pwkeeper/internal/pkg/logger"
 	"yap-pwkeeper/internal/pkg/models"
-	"yap-pwkeeper/pkg/jwtToken"
 )
 
 var (
-	ErrNotFound  = errors.New("user not found")
 	ErrDuplicate = errors.New("user already exists")
-	ErrBadAuth   = errors.New("invalid login credentials")
+	ErrBadAuth   = errors.New("invalid auth credentials")
+	ErrNotFound  = errors.New("user not found")
 	ErrToken     = errors.New("token generation failed")
 )
+
+var ()
 
 type UserStorage interface {
 	AddUser(ctx context.Context, user models.User) (models.User, error)
@@ -39,23 +41,19 @@ func (c *Controller) Register(ctx context.Context, cred models.UserCredentials) 
 	user := models.User{}
 	pwHash, err := bcrypt.GenerateFromPassword([]byte(cred.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate passsword hash: %w", err)
 	}
 	user, err = c.store.AddUser(ctx,
 		models.User{
 			Login:        cred.Login,
 			PasswordHash: string(pwHash),
-			Entity: models.Entity{
-				CreatedAt:  time.Now(),
-				ModifiedAt: time.Now(),
-				State:      models.StateActive,
-			},
+			State:        models.StateActive,
 		})
 	if err != nil {
-		log.Warnf("failed user registration: %s", err.Error())
+		log.Warnf("user registration failed: %s", err.Error())
 		return "", err
 	}
-	log.With("userId", user.Id).Info("success user registration")
+	log.With("userId", user.Id).Info("user registration succeeded")
 	return newSession(ctx, user.Id)
 }
 
@@ -65,14 +63,17 @@ func (c *Controller) Login(ctx context.Context, cred models.UserCredentials) (st
 	user := models.User{}
 	user, err := c.store.GetUserByLogin(ctx, cred.Login)
 	if err != nil {
-		log.Warnf("failed user login : %s", err.Error())
+		log.Warnf("user login failed: %s", err.Error())
+		if errors.Is(ErrNotFound, err) {
+			return "", ErrBadAuth
+		}
 		return "", err
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(cred.Password)); err != nil {
-		log.Warnf("failed user login : %s", err.Error())
+		log.Warnf("user login failed: %s", err.Error())
 		return "", ErrBadAuth
 	}
-	log.With("userId", user.Id).Info("success user login")
+	log.With("userId", user.Id).Info("user login succeeded")
 	return newSession(ctx, user.Id)
 }
 
@@ -81,10 +82,10 @@ func newSession(ctx context.Context, userid string) (string, error) {
 	log.Debug("new user session")
 	token, err := jwtToken.NewToken(userid)
 	if err != nil {
-		log.Errorf("failed user session: %s", err.Error())
-		return "", ErrToken
+		log.Errorf("user session failed: %s: %s", ErrToken.Error(), err.Error())
+		return "", fmt.Errorf("%w: %w", ErrToken, err)
 	}
-	log.With("sessionId", jwtToken.GetTokenSession(token)).Info("success user session")
+	log.With("sessionId", jwtToken.GetTokenSession(token)).Info("user session succeeded")
 	return token, err
 }
 
@@ -95,14 +96,14 @@ func (c *Controller) Refresh(ctx context.Context, token string) (string, error) 
 	newToken, err := jwtToken.RefreshToken(token)
 	if err != nil {
 		if errors.Is(jwtToken.ErrInvalid, err) {
-			log.Warnf("failed session refresh: %s", err.Error())
+			log.Warnf("session refresh failed: %s", err.Error())
 			return "", ErrBadAuth
 		} else {
-			log.Errorf("failed session refresh: %s", err.Error())
+			log.Errorf("session refresh failed: %s", err.Error())
 		}
 		return "", err
 	}
-	log.Info("success session refresh")
+	log.Info("session refresh succeeded")
 	return newToken, err
 }
 

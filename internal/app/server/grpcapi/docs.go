@@ -2,44 +2,30 @@ package grpcapi
 
 import (
 	"context"
-	"errors"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"yap-pwkeeper/internal/pkg/grpc/proto"
-	"yap-pwkeeper/internal/pkg/logger"
 	"yap-pwkeeper/internal/pkg/models"
-	"yap-pwkeeper/internal/pkg/wallet"
 )
 
 type Docs interface {
 	AddNote(ctx context.Context, note models.Note) error
+	DeleteNote(ctx context.Context, note models.Note) error
+	UpdateNote(ctx context.Context, note models.Note) error
+
+	AddCard(ctx context.Context, card models.Card) error
+	DeleteCard(ctx context.Context, card models.Card) error
+	UpdateCard(ctx context.Context, card models.Card) error
+
+	AddCredential(ctx context.Context, credential models.Credential) error
+	DeleteCredential(ctx context.Context, credential models.Credential) error
+	UpdateCredential(ctx context.Context, credential models.Credential) error
 }
 
 type DocsHandlers struct {
 	proto.UnimplementedWalletServer
-	store Docs
+	docs Docs
 }
 
 func NewDocsHandlers(db Docs) *DocsHandlers {
-	return &DocsHandlers{store: db}
-}
-
-func (w DocsHandlers) AddNote(ctx context.Context, in *proto.Note) (*proto.Empty, error) {
-	logger.Log().Info("addnote request")
-	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
-	log.Debug("add note request")
-	note, err := in.ToNote()
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request data")
-	}
-	err = w.store.AddNote(ctx, note)
-	switch {
-	case errors.Is(wallet.ErrBadRequest, err):
-		return nil, status.Error(codes.InvalidArgument, "invalid request data")
-	case err != nil:
-		return nil, status.Error(codes.Internal, "server error")
-	}
-	return &proto.Empty{}, err
+	return &DocsHandlers{docs: db}
 }

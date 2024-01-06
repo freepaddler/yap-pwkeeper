@@ -27,8 +27,43 @@ func (x *Note) ToNote() (models.Note, error) {
 	}
 	return models.Note{
 		Id:       x.Id,
+		Serial:   x.Serial,
+		State:    x.State,
 		Name:     x.Name,
 		Text:     x.Text,
 		Metadata: toMetadata(x.Metadata),
+	}, nil
+}
+
+func (x *Credential) ToCredential() (models.Credential, error) {
+	if x.Name == "" {
+		return models.Credential{}, ErrBadRequest
+	}
+	return models.Credential{
+		Id:       x.Id,
+		Serial:   x.Serial,
+		State:    x.State,
+		Name:     x.Name,
+		Login:    x.Login,
+		Password: x.Password,
+		Metadata: toMetadata(x.Metadata),
+	}, nil
+}
+
+func (x *Card) ToCard() (models.Card, error) {
+	if x.Name == "" {
+		return models.Card{}, ErrBadRequest
+	}
+	return models.Card{
+		Id:         x.Id,
+		Serial:     x.Serial,
+		State:      x.State,
+		Name:       x.Name,
+		Cardholder: x.Cardholder,
+		Number:     x.Number,
+		Expires:    x.Expires,
+		Pin:        x.Pin,
+		Code:       x.Code,
+		Metadata:   toMetadata(x.Metadata),
 	}, nil
 }

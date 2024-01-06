@@ -7,11 +7,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"yap-pwkeeper/internal/pkg/aaa"
+	"yap-pwkeeper/internal/app/server/aaa"
 	"yap-pwkeeper/internal/pkg/grpc/proto"
+	"yap-pwkeeper/internal/pkg/jwtToken"
 	"yap-pwkeeper/internal/pkg/logger"
 	"yap-pwkeeper/internal/pkg/models"
-	"yap-pwkeeper/pkg/jwtToken"
 )
 
 type AAA interface {
@@ -40,7 +40,7 @@ func (a AuthHandlers) Register(ctx context.Context, in *proto.LoginCredentials) 
 	token, err := a.auth.Register(ctx, credentials)
 	switch {
 	case errors.Is(aaa.ErrDuplicate, err):
-		return response, status.Error(codes.AlreadyExists, "user already registered")
+		return response, status.Error(codes.AlreadyExists, aaa.ErrDuplicate.Error())
 	case err != nil:
 		return response, status.Error(codes.Internal, "server error")
 	}
@@ -59,7 +59,7 @@ func (a AuthHandlers) Login(ctx context.Context, in *proto.LoginCredentials) (*p
 	token, err := a.auth.Login(ctx, credentials)
 	switch {
 	case errors.Is(aaa.ErrBadAuth, err):
-		return response, status.Error(codes.Unauthenticated, "invalid login credentials")
+		return response, status.Error(codes.Unauthenticated, aaa.ErrBadAuth.Error())
 	case err != nil:
 		return response, status.Error(codes.Internal, "server error")
 	}
@@ -76,7 +76,7 @@ func (a AuthHandlers) Refresh(ctx context.Context, in *proto.Token) (*proto.Toke
 	token, err := a.auth.Refresh(ctx, in.Token)
 	switch {
 	case errors.Is(aaa.ErrBadAuth, err):
-		return response, status.Error(codes.Unauthenticated, "invalid token")
+		return response, status.Error(codes.Unauthenticated, aaa.ErrBadAuth.Error())
 	case err != nil:
 		return response, status.Error(codes.Internal, "server error")
 	}
