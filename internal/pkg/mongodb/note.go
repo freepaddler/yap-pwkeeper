@@ -39,10 +39,6 @@ func (db *Mongodb) GetNote(ctx context.Context, docId string, userId string) (mo
 		}
 		return note, err
 	}
-	//note, ok := result.(models.Note)
-	//if !ok {
-	//	err = ErrBadDoc
-	//}
 	return note, err
 }
 
@@ -69,4 +65,26 @@ func (db *Mongodb) ModifyNote(ctx context.Context, note models.Note) error {
 		err = wallet.ErrNotFound
 	}
 	return err
+}
+
+func (db *Mongodb) GetNotesStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
+	coll := db.client.Database(dbName).Collection(collNotes)
+	filter := bson.D{
+		{"user_id", userId},
+		{"serial", bson.D{{"$gt", minSerial}}},
+		{"serial", bson.D{{"$lt", maxSerial}}},
+	}
+	cursor, err := coll.Find(ctx, filter)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = cursor.Close(context.Background()) }()
+	for cursor.Next(ctx) {
+		var note models.Note
+		if err := cursor.Decode(&note); err != nil {
+			return err
+		}
+		chData <- note
+	}
+	return nil
 }

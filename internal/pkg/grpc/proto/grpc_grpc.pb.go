@@ -183,8 +183,7 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	Wallet_GetUpdates_FullMethodName       = "/grpcapi.Wallet/GetUpdates"
-	Wallet_GetUpdate_FullMethodName        = "/grpcapi.Wallet/GetUpdate"
+	Wallet_GetUpdateStream_FullMethodName  = "/grpcapi.Wallet/GetUpdateStream"
 	Wallet_AddNote_FullMethodName          = "/grpcapi.Wallet/AddNote"
 	Wallet_DeleteNote_FullMethodName       = "/grpcapi.Wallet/DeleteNote"
 	Wallet_UpdateNote_FullMethodName       = "/grpcapi.Wallet/UpdateNote"
@@ -200,8 +199,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WalletClient interface {
-	GetUpdates(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
-	GetUpdate(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Wallet_GetUpdateClient, error)
+	GetUpdateStream(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Wallet_GetUpdateStreamClient, error)
 	AddNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
 	DeleteNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
 	UpdateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
@@ -221,21 +219,12 @@ func NewWalletClient(cc grpc.ClientConnInterface) WalletClient {
 	return &walletClient{cc}
 }
 
-func (c *walletClient) GetUpdates(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
-	out := new(UpdateResponse)
-	err := c.cc.Invoke(ctx, Wallet_GetUpdates_FullMethodName, in, out, opts...)
+func (c *walletClient) GetUpdateStream(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Wallet_GetUpdateStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Wallet_ServiceDesc.Streams[0], Wallet_GetUpdateStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
-}
-
-func (c *walletClient) GetUpdate(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Wallet_GetUpdateClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Wallet_ServiceDesc.Streams[0], Wallet_GetUpdate_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &walletGetUpdateClient{stream}
+	x := &walletGetUpdateStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -245,16 +234,16 @@ func (c *walletClient) GetUpdate(ctx context.Context, in *UpdateRequest, opts ..
 	return x, nil
 }
 
-type Wallet_GetUpdateClient interface {
+type Wallet_GetUpdateStreamClient interface {
 	Recv() (*UpdateResponse, error)
 	grpc.ClientStream
 }
 
-type walletGetUpdateClient struct {
+type walletGetUpdateStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *walletGetUpdateClient) Recv() (*UpdateResponse, error) {
+func (x *walletGetUpdateStreamClient) Recv() (*UpdateResponse, error) {
 	m := new(UpdateResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -347,8 +336,7 @@ func (c *walletClient) UpdateCard(ctx context.Context, in *Card, opts ...grpc.Ca
 // All implementations must embed UnimplementedWalletServer
 // for forward compatibility
 type WalletServer interface {
-	GetUpdates(context.Context, *UpdateRequest) (*UpdateResponse, error)
-	GetUpdate(*UpdateRequest, Wallet_GetUpdateServer) error
+	GetUpdateStream(*UpdateRequest, Wallet_GetUpdateStreamServer) error
 	AddNote(context.Context, *Note) (*Empty, error)
 	DeleteNote(context.Context, *Note) (*Empty, error)
 	UpdateNote(context.Context, *Note) (*Empty, error)
@@ -365,11 +353,8 @@ type WalletServer interface {
 type UnimplementedWalletServer struct {
 }
 
-func (UnimplementedWalletServer) GetUpdates(context.Context, *UpdateRequest) (*UpdateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUpdates not implemented")
-}
-func (UnimplementedWalletServer) GetUpdate(*UpdateRequest, Wallet_GetUpdateServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetUpdate not implemented")
+func (UnimplementedWalletServer) GetUpdateStream(*UpdateRequest, Wallet_GetUpdateStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetUpdateStream not implemented")
 }
 func (UnimplementedWalletServer) AddNote(context.Context, *Note) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddNote not implemented")
@@ -411,42 +396,24 @@ func RegisterWalletServer(s grpc.ServiceRegistrar, srv WalletServer) {
 	s.RegisterService(&Wallet_ServiceDesc, srv)
 }
 
-func _Wallet_GetUpdates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WalletServer).GetUpdates(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Wallet_GetUpdates_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).GetUpdates(ctx, req.(*UpdateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Wallet_GetUpdate_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Wallet_GetUpdateStream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(UpdateRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(WalletServer).GetUpdate(m, &walletGetUpdateServer{stream})
+	return srv.(WalletServer).GetUpdateStream(m, &walletGetUpdateStreamServer{stream})
 }
 
-type Wallet_GetUpdateServer interface {
+type Wallet_GetUpdateStreamServer interface {
 	Send(*UpdateResponse) error
 	grpc.ServerStream
 }
 
-type walletGetUpdateServer struct {
+type walletGetUpdateStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *walletGetUpdateServer) Send(m *UpdateResponse) error {
+func (x *walletGetUpdateStreamServer) Send(m *UpdateResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -620,10 +587,6 @@ var Wallet_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*WalletServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetUpdates",
-			Handler:    _Wallet_GetUpdates_Handler,
-		},
-		{
 			MethodName: "AddNote",
 			Handler:    _Wallet_AddNote_Handler,
 		},
@@ -662,8 +625,8 @@ var Wallet_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetUpdate",
-			Handler:       _Wallet_GetUpdate_Handler,
+			StreamName:    "GetUpdateStream",
+			Handler:       _Wallet_GetUpdateStream_Handler,
 			ServerStreams: true,
 		},
 	},

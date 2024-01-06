@@ -3,6 +3,9 @@ package grpcapi
 import (
 	"context"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	pb "yap-pwkeeper/internal/pkg/grpc/proto"
 	"yap-pwkeeper/internal/pkg/logger"
 	"yap-pwkeeper/internal/pkg/models"
@@ -20,6 +23,8 @@ type Docs interface {
 	AddCredential(ctx context.Context, credential models.Credential) error
 	DeleteCredential(ctx context.Context, credential models.Credential) error
 	UpdateCredential(ctx context.Context, credential models.Credential) error
+
+	GetUpdatesStream(ctx context.Context, userId string, minSerial int64, chData chan interface{}, chErr chan error)
 }
 
 type DocsHandlers struct {
@@ -31,52 +36,42 @@ func NewDocsHandlers(db Docs) *DocsHandlers {
 	return &DocsHandlers{docs: db}
 }
 
-func (w DocsHandlers) GetUpdates(ctx context.Context, in *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+func (w DocsHandlers) GetUpdateStream(request *pb.UpdateRequest, stream pb.Wallet_GetUpdateStreamServer) error {
+	ctx, cancel := context.WithCancel(stream.Context())
+	defer cancel()
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
-	log.Debug("update request")
-	response := &pb.UpdateResponse{
-		Update: &pb.UpdateResponse_Note{Note: &pb.Note{
-			Id:     "someId",
-			Serial: 0,
-			State:  "active",
-			Name:   "somename",
-			Text:   "sometext",
-		}},
-	}
-	log.Debug("update response")
-	return response, nil
-}
+	log.Debug("update stream request")
+	chData := make(chan interface{})
+	chErr := make(chan error)
+	userId, _ := logger.GetUserId(ctx)
+	go w.docs.GetUpdatesStream(ctx, userId, request.GetSerial(), chData, chErr)
+	for {
+		data, ok := <-chData
+		if !ok {
+			break
+		}
+		response := new(pb.UpdateResponse)
+		switch data.(type) {
+		case models.Note:
+			response = &pb.UpdateResponse{Update: &pb.UpdateResponse_Note{Note: pb.FromNote(data.(models.Note))}}
+		case models.Card:
+			response = &pb.UpdateResponse{Update: &pb.UpdateResponse_Card{Card: pb.FromCard(data.(models.Card))}}
+		case models.Credential:
+			response = &pb.UpdateResponse{Update: &pb.UpdateResponse_Credential{Credential: pb.FromCredential(data.(models.Credential))}}
+		default:
+			log.Warnf("invalid data type in updates stream")
+			continue
+		}
+		if err := stream.Send(response); err != nil {
+			logger.Log().WithErr(err).Debug("update stream send failed")
+			cancel()
+			return status.Error(codes.Internal, "update stream send failed")
+		}
 
-func (w DocsHandlers) GetUpdate(request *pb.UpdateRequest, stream pb.Wallet_GetUpdateServer) error {
-	ctx := stream.Context()
-	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
-	log.Debug("update request")
-	response := &pb.UpdateResponse{
-		Update: &pb.UpdateResponse_Note{Note: &pb.Note{
-			Id:     "someId",
-			Serial: 0,
-			State:  "active",
-			Name:   "somename",
-			Text:   "sometext",
-		}},
 	}
-	if err := stream.Send(response); err != nil {
-		logger.Log().WithErr(err).Debug("note send failed")
+	if err := <-chErr; err != nil {
+		return status.Error(codes.Internal, "update stream failed")
 	}
-	response = &pb.UpdateResponse{
-		Update: &pb.UpdateResponse_Credential{
-			Credential: &pb.Credential{
-				Id:     "credId",
-				Serial: 0,
-				State:  "active",
-				Name:   "credName",
-				Login:  "credLogin",
-			},
-		},
-	}
-	if err := stream.Send(response); err != nil {
-		logger.Log().WithErr(err).Debug("cred send failed")
-	}
-	logger.Log().Debug("send finished")
+	logger.Log().Debug("update stream success")
 	return nil
 }

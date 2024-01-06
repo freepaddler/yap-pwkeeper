@@ -60,11 +60,25 @@ func (db *Mongodb) createIndexes(ctx context.Context) error {
 		Keys:    bson.D{{"login", 1}},
 		Options: options.Index().SetUnique(true),
 	}
-	logger.Log().Infof("creating index login_1_unique on %s", collUsers)
+	logger.Log().Infof("create index: login 1 unique for collection %s", collUsers)
 	_, err := coll.Indexes().CreateOne(ctx, userLogin)
 	if err != nil {
 		return err
 	}
+
+	// documents search indexes
+	search := mongo.IndexModel{
+		Keys: bson.D{{"serial", -1}, {"user_id", 1}},
+	}
+	for _, v := range []string{collCards, collNotes, collSerials} {
+		coll = db.client.Database(dbName).Collection(v)
+		logger.Log().Infof("create index: serial -1 user_id 1 for collection %s", v)
+		_, err := coll.Indexes().CreateOne(ctx, search)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

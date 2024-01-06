@@ -3,7 +3,12 @@ package wallet
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"golang.org/x/sync/errgroup"
+
+	"yap-pwkeeper/internal/app/server/serial"
+	"yap-pwkeeper/internal/pkg/logger"
 	"yap-pwkeeper/internal/pkg/models"
 	"yap-pwkeeper/internal/pkg/namedq"
 )
@@ -19,14 +24,17 @@ type DocStorage interface {
 	AddNote(ctx context.Context, note models.Note) (string, error)
 	GetNote(ctx context.Context, docId string, userId string) (models.Note, error)
 	ModifyNote(ctx context.Context, note models.Note) error
+	GetNotesStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error
 
 	AddCard(ctx context.Context, card models.Card) (string, error)
 	GetCard(ctx context.Context, docId string, userId string) (models.Card, error)
 	ModifyCard(ctx context.Context, card models.Card) error
+	GetCardsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error
 
 	AddCredential(ctx context.Context, credential models.Credential) (string, error)
 	GetCredential(ctx context.Context, docId string, userId string) (models.Credential, error)
 	ModifyCredential(ctx context.Context, credential models.Credential) error
+	GetCredentialsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error
 }
 
 type Controller struct {
@@ -40,4 +48,34 @@ func New(store DocStorage) *Controller {
 		queue: namedq.New(),
 	}
 	return c
+}
+
+func (c *Controller) GetUpdatesStream(ctx context.Context, userId string, minSerial int64, chData chan interface{}, chErr chan error) {
+	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
+	log.Debug("updates stream request")
+	maxSerial, err := serial.Next(ctx)
+	if err != nil {
+		close(chData)
+		chErr <- fmt.Errorf("unable to get new serial: %w", err)
+		close(chErr)
+		return
+	}
+	g, gCtx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return c.store.GetNotesStream(gCtx, userId, minSerial, maxSerial, chData)
+	})
+	g.Go(func() error {
+		return c.store.GetCardsStream(gCtx, userId, minSerial, maxSerial, chData)
+	})
+	g.Go(func() error {
+		return c.store.GetCredentialsStream(gCtx, userId, minSerial, maxSerial, chData)
+	})
+
+	err = g.Wait()
+	close(chData)
+	if err != nil {
+		log.WithErr(err).Error("updates stream failed")
+		chErr <- err
+	}
+	close(chErr)
 }

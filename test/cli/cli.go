@@ -72,8 +72,6 @@ func main() {
 		addCard()
 	case "addcred":
 		addCred()
-	case "get":
-		getUpdate()
 	case "getStream":
 		getUpdateStream()
 	}
@@ -83,8 +81,8 @@ func main() {
 func getUpdateStream() {
 	fmt.Println("UPDATE STREAM")
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
-	req := &proto.UpdateRequest{Serial: int64(-1)}
-	stream, err := wallet.GetUpdate(ctx, req)
+	req := &proto.UpdateRequest{Serial: int64(serial)}
+	stream, err := wallet.GetUpdateStream(ctx, req)
 	if err != nil {
 		fmt.Println("error ", err)
 		return
@@ -106,26 +104,9 @@ func getUpdateStream() {
 		case *proto.UpdateResponse_Credential:
 			cred := update.Credential
 			fmt.Println("cred: ", cred)
-		}
-	}
-}
-
-func getUpdate() {
-	fmt.Println("UPDATE")
-	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
-	req := &proto.UpdateRequest{Serial: int64(-1)}
-	response, err := wallet.GetUpdates(ctx, req)
-	if err != nil {
-		fmt.Println("error ", err)
-	} else {
-		switch response.Update.(type) {
-		case *proto.UpdateResponse_Note:
-			fmt.Println("update type is note")
-			note, ok := response.Update.(*proto.UpdateResponse_Note)
-			fmt.Println("ok: ", ok)
-			fmt.Println("note: ", note)
-		default:
-			fmt.Println("unknown update type")
+		case *proto.UpdateResponse_Card:
+			card := update.Card
+			fmt.Println("card: ", card)
 		}
 	}
 }
@@ -168,13 +149,13 @@ func refresh() {
 
 func addNote() {
 	fmt.Println("ADD NOTE")
-
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
 	req := &proto.Note{
 		Name:     name,
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Text:     text,
 	}
-	_, err := wallet.AddNote(context.Background(), req)
+	_, err := wallet.AddNote(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -182,7 +163,7 @@ func addNote() {
 
 func delNote() {
 	fmt.Println("DEL NOTE")
-
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
 	req := &proto.Note{
 		Id:       id,
 		Serial:   serial,
@@ -190,7 +171,7 @@ func delNote() {
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Text:     text,
 	}
-	_, err := wallet.DeleteNote(context.Background(), req)
+	_, err := wallet.DeleteNote(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -198,7 +179,7 @@ func delNote() {
 
 func updNote() {
 	fmt.Println("MOD NOTE")
-
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
 	req := &proto.Note{
 		Id:       id,
 		Serial:   serial,
@@ -206,7 +187,7 @@ func updNote() {
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Text:     text,
 	}
-	_, err := wallet.UpdateNote(context.Background(), req)
+	_, err := wallet.UpdateNote(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -214,13 +195,13 @@ func updNote() {
 
 func addCard() {
 	fmt.Println("ADD CARD")
-
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
 	req := &proto.Card{
 		Name:     name,
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Expires:  expires,
 	}
-	_, err := wallet.AddCard(context.Background(), req)
+	_, err := wallet.AddCard(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}

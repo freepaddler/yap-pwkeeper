@@ -21,6 +21,17 @@ func toMetadata(x []*Meta) []models.Meta {
 	return metadata
 }
 
+func fromMetadata(x []models.Meta) []*Meta {
+	metadata := make([]*Meta, len(x))
+	for i, v := range x {
+		metadata[i] = &Meta{
+			Key:   v.Key,
+			Value: v.Value,
+		}
+	}
+	return metadata
+}
+
 func (x *Note) ToNote() (models.Note, error) {
 	if x.Name == "" {
 		return models.Note{}, ErrBadRequest
@@ -33,6 +44,17 @@ func (x *Note) ToNote() (models.Note, error) {
 		Text:     x.Text,
 		Metadata: toMetadata(x.Metadata),
 	}, nil
+}
+
+func FromNote(x models.Note) *Note {
+	return &Note{
+		Id:       x.Id,
+		Serial:   x.Serial,
+		State:    x.State,
+		Name:     x.Name,
+		Text:     x.Text,
+		Metadata: fromMetadata(x.Metadata),
+	}
 }
 
 func (x *Credential) ToCredential() (models.Credential, error) {
@@ -48,6 +70,18 @@ func (x *Credential) ToCredential() (models.Credential, error) {
 		Password: x.Password,
 		Metadata: toMetadata(x.Metadata),
 	}, nil
+}
+
+func FromCredential(x models.Credential) *Credential {
+	return &Credential{
+		Id:       x.Id,
+		Serial:   x.Serial,
+		State:    x.State,
+		Name:     x.Name,
+		Login:    x.Login,
+		Password: x.Password,
+		Metadata: fromMetadata(x.Metadata),
+	}
 }
 
 func (x *Card) ToCard() (models.Card, error) {
@@ -66,4 +100,19 @@ func (x *Card) ToCard() (models.Card, error) {
 		Code:       x.Code,
 		Metadata:   toMetadata(x.Metadata),
 	}, nil
+}
+
+func FromCard(x models.Card) *Card {
+	return &Card{
+		Id:         x.Id,
+		Serial:     x.Serial,
+		State:      x.State,
+		Name:       x.Name,
+		Cardholder: x.Cardholder,
+		Number:     x.Number,
+		Expires:    x.Expires,
+		Pin:        x.Pin,
+		Code:       x.Code,
+		Metadata:   fromMetadata(x.Metadata),
+	}
 }

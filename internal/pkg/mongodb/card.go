@@ -39,10 +39,6 @@ func (db *Mongodb) GetCard(ctx context.Context, docId string, userId string) (mo
 		}
 		return card, err
 	}
-	//card, ok := result.(models.Card)
-	//if !ok {
-	//	err = ErrBadDoc
-	//}
 	return card, err
 }
 
@@ -69,4 +65,26 @@ func (db *Mongodb) ModifyCard(ctx context.Context, card models.Card) error {
 		err = wallet.ErrNotFound
 	}
 	return err
+}
+
+func (db *Mongodb) GetCardsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
+	coll := db.client.Database(dbName).Collection(collCards)
+	filter := bson.D{
+		{"user_id", userId},
+		{"serial", bson.D{{"$gt", minSerial}}},
+		{"serial", bson.D{{"$lt", maxSerial}}},
+	}
+	cursor, err := coll.Find(ctx, filter)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = cursor.Close(context.Background()) }()
+	for cursor.Next(ctx) {
+		var card models.Card
+		if err := cursor.Decode(&card); err != nil {
+			return err
+		}
+		chData <- card
+	}
+	return nil
 }
