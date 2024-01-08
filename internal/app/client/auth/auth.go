@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"log"
 	"sync"
 	"time"
 
@@ -9,11 +10,10 @@ import (
 	"google.golang.org/grpc/status"
 
 	"yap-pwkeeper/internal/pkg/jwtToken"
-	"yap-pwkeeper/internal/pkg/logger"
 )
 
-type AAA interface {
-	Register(login string, password string) (string, error)
+type AuthServer interface {
+	register(login string, password string) (string, error)
 	Login(login string, password string) (string, error)
 	RefreshToken(token string) (string, error)
 }
@@ -26,13 +26,13 @@ var (
 type Controller struct {
 	refreshBeforeExpire  time.Duration
 	refreshRetryInterval time.Duration
-	server               AAA
+	server               AuthServer
 	token                string
 	ch                   chan struct{}
 	mu                   sync.RWMutex
 }
 
-func New(server AAA) *Controller {
+func New(server AuthServer) *Controller {
 	return &Controller{
 		server:               server,
 		ch:                   make(chan struct{}),
@@ -49,7 +49,7 @@ func (c *Controller) GetToken() string {
 }
 
 func (c *Controller) Register(login, password string) error {
-	token, err := c.server.Register(login, password)
+	token, err := c.server.register(login, password)
 	if err != nil {
 		return err
 	}
@@ -72,19 +72,19 @@ func (c *Controller) setToken(token string) {
 	close(c.ch)
 	c.token = token
 	c.ch = make(chan struct{})
-	logger.Log().Debug("got new token")
+	log.Println("got new token")
 	go c.refreshToken(token)
 }
 
 func (c *Controller) refreshToken(token string) {
-	logger.Log().Debug("token refresh routine started")
+	log.Println("token refresh routine started")
 	var err error
 	var newToken string
 	defer func() {
 		if err != nil {
-			logger.Log().WithErr(err).Error("token refresh routine terminated")
+			log.Printf("token refresh routine terminated: %s", err.Error())
 		} else {
-			logger.Log().Debug("token refresh routine stopped")
+			log.Println("token refresh routine stopped")
 		}
 	}()
 	expire, err := jwtToken.GetTokenExpire(token)
@@ -106,7 +106,7 @@ func (c *Controller) refreshToken(token string) {
 				err = ErrRejected
 				return
 			default:
-				logger.Log().WithErr(err).Debug("token refresh failed")
+				log.Printf("token refresh failed: %s", err.Error())
 			}
 			err = nil
 			select {

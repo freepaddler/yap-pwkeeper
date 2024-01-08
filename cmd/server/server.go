@@ -55,7 +55,7 @@ func main() {
 	// set jwt key
 	if conf.TokenKey != "" {
 		jwtToken.SetKey(conf.TokenKey)
-		jwtToken.SetTTL(2 * time.Hour)
+		jwtToken.SetTTL(2*time.Minute + 10*time.Second)
 	}
 
 	logger.Log().Info("starting server")

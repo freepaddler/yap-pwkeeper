@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Auth_Register_FullMethodName = "/grpcapi.Auth/Register"
-	Auth_Login_FullMethodName    = "/grpcapi.Auth/Login"
+	Auth_Register_FullMethodName = "/grpcapi.Auth/register"
+	Auth_Login_FullMethodName    = "/grpcapi.Auth/login"
 	Auth_Refresh_FullMethodName  = "/grpcapi.Auth/Refresh"
 )
 
@@ -83,10 +83,10 @@ type UnimplementedAuthServer struct {
 }
 
 func (UnimplementedAuthServer) Register(context.Context, *LoginCredentials) (*Token, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method register not implemented")
 }
 func (UnimplementedAuthServer) Login(context.Context, *LoginCredentials) (*Token, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method login not implemented")
 }
 func (UnimplementedAuthServer) Refresh(context.Context, *Token) (*Token, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
@@ -166,11 +166,11 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Register",
+			MethodName: "register",
 			Handler:    _Auth_Register_Handler,
 		},
 		{
-			MethodName: "Login",
+			MethodName: "login",
 			Handler:    _Auth_Login_Handler,
 		},
 		{

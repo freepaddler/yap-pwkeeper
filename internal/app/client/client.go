@@ -1,30 +1,46 @@
 package client
 
 import (
+	"io"
+	"log"
+
 	"github.com/rivo/tview"
 
 	"yap-pwkeeper/internal/pkg/models"
 )
 
-type Auther interface {
-	Register(request models.LoginRequest) (models.AuthToken, error)
-	Login(request models.LoginRequest) (models.AuthToken, error)
-	Refresh(token models.AuthToken) (models.AuthToken, error)
+const (
+	logsPage = "logsPage"
+	mainPage = "finder"
+)
+
+type AuthServer interface {
+	Register(login, password string) error
+	Login(login, password string) error
+}
+
+type DataStore interface {
+	Update() error
+	GetCardsList() []*models.Card
+	GetCredentialsList() []*models.Credential
+	GetNotesList() []*models.Note
+	GetNote(id string) *models.Note
+	GetCard(id string) *models.Card
+	GetCredential(id string) *models.Credential
 }
 
 type App struct {
-	ui      *tview.Application
-	pages   *tview.Pages
-	token   models.AuthToken
-	authAPI Auther
-	data    models.Wallet
+	ui         *tview.Application
+	pages      *tview.Pages
+	authServer AuthServer
+	debug      bool
+	store      DataStore
 }
 
-func New(options ...func(*App)) *App {
+func New(options ...func(a *App)) *App {
 	app := &App{
 		ui:    tview.NewApplication(),
 		pages: tview.NewPages(),
-		data:  models.Store,
 	}
 	for _, opt := range options {
 		opt(app)
@@ -33,9 +49,28 @@ func New(options ...func(*App)) *App {
 	return app
 }
 
+func WithAuthServer(aaa AuthServer) func(a *App) {
+	return func(a *App) {
+		a.authServer = aaa
+	}
+}
+func WithDataStore(ds DataStore) func(a *App) {
+	return func(a *App) {
+		a.store = ds
+	}
+}
+func WithDebug(level int) func(a *App) {
+	return func(a *App) {
+		if level > 0 {
+			a.debug = true
+		}
+	}
+}
+
 func (a *App) Run() error {
+	log.SetOutput(io.Discard)
 	a.welcomePage()
-	//a.pages.SwitchToPage("welcome")
+	a.browser()
 	return a.ui.Run()
 }
 

@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
-	"time"
 
-	"yap-pwkeeper/internal/app/client/auth"
+	"yap-pwkeeper/internal/app/client"
 	"yap-pwkeeper/internal/app/client/config"
 	"yap-pwkeeper/internal/app/client/grpccli"
-	"yap-pwkeeper/internal/pkg/logger"
+	"yap-pwkeeper/internal/app/client/memstore"
 )
 
 var (
@@ -21,7 +21,11 @@ var (
 
 func main() {
 	exitCode := 0
-	defer func() { os.Exit(exitCode) }()
+	defer func() {
+		log.SetOutput(os.Stderr)
+		log.Printf("application exited with code: %d\n", exitCode)
+		os.Exit(exitCode)
+	}()
 	// print version
 	version()
 
@@ -34,36 +38,36 @@ func main() {
 	}
 
 	// setup logging
-	logger.SetMode(logger.ModeDev)
-	logger.SetLevel(conf.LogLevel)
-	conf.Print()
+	if conf.Debug == 2 {
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+	}
 
 	// setup grpc client
-	client, err := grpccli.New(conf.Address)
+	log.Println("setup server connection...")
+	grpcClient, err := grpccli.New(conf.Address)
 	if err != nil {
-		logger.Log().WithErr(err).Error("setup server connection failed")
+		log.Printf("server connection setup failed: %s", err.Error())
+		exitCode = 1
+		return
 	}
-	defer func() { _ = client.Close() }()
-	logger.Log().Info("server connection set up")
+	defer func() { _ = grpcClient.Close() }()
 
-	// setup auth
-	aaa := auth.New(client)
+	_ = grpcClient.Login("chu", "Victor")
 
-	err = aaa.Login("login", "password")
-	if err != nil {
-		logger.Log().WithErr(err).Debug("login failed")
-	} else {
-		logger.Log().Debug("logged in")
+	store := memstore.New(grpcClient)
+
+	ui := client.New(
+		client.WithAuthServer(grpcClient),
+		client.WithDataStore(store),
+		client.WithDebug(conf.Debug),
+	)
+	log.Println("starting ui")
+
+	if err := ui.Run(); err != nil {
+		log.SetOutput(os.Stderr)
+		log.Println("ui terminated")
 	}
-	time.Sleep(40 * time.Second)
-	return
 
-	//ui := client.New()
-	//log.Print("start")
-	//if err := ui.Run(); err != nil {
-	//	panic(err)
-	//}
-	//log.Print("end")
 }
 
 func version() {

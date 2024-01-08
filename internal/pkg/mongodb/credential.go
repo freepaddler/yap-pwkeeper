@@ -80,7 +80,7 @@ func (db *Mongodb) GetCredentialsStream(ctx context.Context, userId string, minS
 	}
 	defer func() { _ = cursor.Close(context.Background()) }()
 	for cursor.Next(ctx) {
-		var cred models.Card
+		var cred models.Credential
 		if err := cursor.Decode(&cred); err != nil {
 			return err
 		}

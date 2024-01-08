@@ -799,8 +799,8 @@ var file_grpc_proto_depIdxs = []int32{
 	4,  // 3: grpcapi.UpdateResponse.note:type_name -> grpcapi.Note
 	5,  // 4: grpcapi.UpdateResponse.credential:type_name -> grpcapi.Credential
 	6,  // 5: grpcapi.UpdateResponse.card:type_name -> grpcapi.Card
-	1,  // 6: grpcapi.Auth.Register:input_type -> grpcapi.LoginCredentials
-	1,  // 7: grpcapi.Auth.Login:input_type -> grpcapi.LoginCredentials
+	1,  // 6: grpcapi.Auth.register:input_type -> grpcapi.LoginCredentials
+	1,  // 7: grpcapi.Auth.login:input_type -> grpcapi.LoginCredentials
 	2,  // 8: grpcapi.Auth.Refresh:input_type -> grpcapi.Token
 	7,  // 9: grpcapi.Wallet.GetUpdateStream:input_type -> grpcapi.UpdateRequest
 	4,  // 10: grpcapi.Wallet.AddNote:input_type -> grpcapi.Note
@@ -812,8 +812,8 @@ var file_grpc_proto_depIdxs = []int32{
 	6,  // 16: grpcapi.Wallet.AddCard:input_type -> grpcapi.Card
 	6,  // 17: grpcapi.Wallet.DeleteCard:input_type -> grpcapi.Card
 	6,  // 18: grpcapi.Wallet.UpdateCard:input_type -> grpcapi.Card
-	2,  // 19: grpcapi.Auth.Register:output_type -> grpcapi.Token
-	2,  // 20: grpcapi.Auth.Login:output_type -> grpcapi.Token
+	2,  // 19: grpcapi.Auth.register:output_type -> grpcapi.Token
+	2,  // 20: grpcapi.Auth.login:output_type -> grpcapi.Token
 	2,  // 21: grpcapi.Auth.Refresh:output_type -> grpcapi.Token
 	8,  // 22: grpcapi.Wallet.GetUpdateStream:output_type -> grpcapi.UpdateResponse
 	0,  // 23: grpcapi.Wallet.AddNote:output_type -> grpcapi.Empty

@@ -1,7 +1,7 @@
 package grpccli
 
 import (
-	"context"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -11,19 +11,27 @@ import (
 )
 
 type Client struct {
-	address     string
-	conn        *grpc.ClientConn
-	auth        proto.AuthClient
-	docs        proto.WalletClient
-	authTimeout time.Duration
-	docsTimeout time.Duration
+	address              string
+	conn                 *grpc.ClientConn
+	auth                 proto.AuthClient
+	docs                 proto.WalletClient
+	authTimeout          time.Duration
+	docsTimeout          time.Duration
+	refreshBeforeExpire  time.Duration
+	refreshRetryInterval time.Duration
+	token                string
+	ch                   chan struct{}
+	mu                   sync.RWMutex
 }
 
 func New(address string, options ...func(c *Client)) (*Client, error) {
 	cli := &Client{
-		address:     address,
-		authTimeout: 5 * time.Second,
-		docsTimeout: 30 * time.Second,
+		address:              address,
+		authTimeout:          5 * time.Second,
+		docsTimeout:          30 * time.Second,
+		ch:                   make(chan struct{}),
+		refreshBeforeExpire:  2 * time.Minute,
+		refreshRetryInterval: 5 * time.Second,
 	}
 	for _, opt := range options {
 		opt(cli)
@@ -47,39 +55,4 @@ func WithTimeouts(auth, docs time.Duration) func(c *Client) {
 
 func (c *Client) Close() error {
 	return c.conn.Close()
-}
-
-func (c *Client) Register(login string, password string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.authTimeout)
-	defer cancel()
-	cred := &proto.LoginCredentials{
-		Login:    login,
-		Password: password,
-	}
-	token := &proto.Token{}
-	token, err := c.auth.Register(ctx, cred)
-	return token.GetToken(), err
-}
-
-func (c *Client) Login(login string, password string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.authTimeout)
-	defer cancel()
-	cred := &proto.LoginCredentials{
-		Login:    login,
-		Password: password,
-	}
-	token := &proto.Token{}
-	token, err := c.auth.Login(ctx, cred)
-	return token.GetToken(), err
-}
-
-func (c *Client) RefreshToken(token string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.authTimeout)
-	defer cancel()
-	oldToken := &proto.Token{
-		Token: token,
-	}
-	newToken := &proto.Token{}
-	newToken, err := c.auth.Refresh(ctx, oldToken)
-	return newToken.GetToken(), err
 }
