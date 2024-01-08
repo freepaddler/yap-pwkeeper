@@ -1,11 +1,14 @@
 package grpccli
 
 import (
+	"errors"
 	"sync"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 
 	"yap-pwkeeper/internal/pkg/grpc/proto"
 )
@@ -55,4 +58,27 @@ func WithTimeouts(auth, docs time.Duration) func(c *Client) {
 
 func (c *Client) Close() error {
 	return c.conn.Close()
+}
+
+var (
+	ErrAuthFail    = errors.New("authorization failed, new login required")
+	ErrUnavailable = errors.New("unable to connect server")
+)
+
+func parseErr(err error) error {
+	if err == nil {
+		return nil
+	}
+	st, _ := status.FromError(err)
+	switch st.Code() {
+	case codes.Unauthenticated:
+		return ErrAuthFail
+	case codes.Unavailable:
+		return ErrUnavailable
+	default:
+		if st.Message() == "" {
+			return errors.New(st.Code().String())
+		}
+		return errors.New(st.Message())
+	}
 }

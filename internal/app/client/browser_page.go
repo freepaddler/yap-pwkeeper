@@ -1,11 +1,12 @@
 package client
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
+	"yap-pwkeeper/internal/app/client/grpccli"
 	"yap-pwkeeper/internal/pkg/models"
 )
 
@@ -25,25 +26,28 @@ func (a *App) browser() {
 	categories := tview.NewList().ShowSecondaryText(false)
 	categories.SetBorder(true).SetTitle("Categories")
 
-	// layout
-	flex.AddItem(categories, 0, 1, true)
-	flex.AddItem(items, 0, 1, true)
-	flex.AddItem(form, 0, 3, true)
+	help := tview.NewForm()
+	help.SetHorizontal(true)
+	help.AddTextView("Quit: `Esc`    Add New Document: `A`    Get Server Updates `U`", "", 1, 1, true, false)
 
-	categories.AddItem(fmt.Sprintf("Cards (%d)", len(a.store.GetCardsList())), "2", 0, func() {
+	flex.AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(tview.NewFlex().
+			AddItem(categories, 0, 1, false).
+			AddItem(items, 0, 1, false).
+			AddItem(form, 0, 3, true), 0, 1, true).
+		AddItem(help, 3, 1, false), 0, 1, true)
+
+	categories.AddItem("Cards", "", 0, func() {
 		a.ui.SetFocus(items)
 	})
-	categories.AddItem(fmt.Sprintf("Credentials (%d)", len(a.store.GetCredentialsList())), "", 0, func() {
+	categories.AddItem("Credentials", "", 0, func() {
 		a.ui.SetFocus(items)
 	})
-	categories.AddItem(fmt.Sprintf("Notes (%d)", len(a.store.GetNotesList())), "", 0, func() {
+	categories.AddItem("Notes", "", 0, func() {
 		a.ui.SetFocus(items)
 	})
 
 	categories.SetFocusFunc(func() {
-		//if categories.GetCurrentItem() == 0 {
-		//	a.cardsList(items, form)
-		//}
 		form.Clear(true)
 		switch categories.GetCurrentItem() {
 		case 0:
@@ -77,6 +81,18 @@ func (a *App) browser() {
 			a.modalExit()
 			return nil
 		}
+		switch event.Rune() {
+		case 'a':
+			a.modalErr("test")
+			return nil
+		case 'A':
+			a.modalUnauthorized("relogin")
+			return nil
+		case 'u':
+			a.requestUpdate(categories)
+		case 'U':
+			a.requestUpdate(categories)
+		}
 		return event
 	})
 
@@ -108,6 +124,7 @@ func (a *App) browser() {
 	}
 	a.pages.AddPage(mainPage, flex, true, true)
 	a.pages.SwitchToPage(mainPage)
+	a.ui.SetFocus(categories)
 }
 
 func (a *App) notesList(list *tview.List, form *tview.Form) {
@@ -133,7 +150,14 @@ func (a *App) notesList(list *tview.List, form *tview.Form) {
 
 func (a *App) notesForm(id string, form *tview.Form, list *tview.List) {
 	doc := *a.store.GetNote(id)
-	// TODO: deleted in store
+	if doc.State == models.StateDeleted {
+		form.Clear(true)
+		form.SetCancelFunc(func() {
+			a.ui.SetFocus(list)
+		})
+		return
+	}
+
 	form.Clear(true).SetTitle("Edit Note")
 	form.AddInputField("Name", doc.Name, 30, nil, func(text string) {
 		doc.Name = text
@@ -141,14 +165,47 @@ func (a *App) notesForm(id string, form *tview.Form, list *tview.List) {
 	form.AddTextArea("Text", doc.Text, 30, 5, 4096, func(text string) {
 		doc.Text = text
 	})
-	drawMetadata(form, &doc.Metadata)
+	//form.AddTextView("Metadata", "", 30, 1, true, true)
+	//form.AddDropDown("Delete Meta", []string{}, -1, nil)
+	a.drawMetadata(form, &doc.Metadata)
 	form.AddButton("Back", func() {
 		a.ui.SetFocus(list)
 	})
 	form.AddButton("Add  Meta", func() {
 		a.addMeta(form, &doc.Metadata)
 	})
-	form.AddButton("Save", nil)
+	form.AddButton("Save", func() {
+		if err := a.store.UpdateNote(doc); err != nil {
+			if errors.Is(grpccli.ErrAuthFail, err) {
+				a.modalUnauthorized(err.Error())
+			} else {
+				a.modalErr(err.Error())
+			}
+		} else {
+			if err := a.store.Update(); err != nil {
+				if errors.Is(grpccli.ErrAuthFail, err) {
+					a.modalUnauthorized(err.Error())
+				} else {
+					a.modalErr("Changes saved, but failed to get server updates" + err.Error())
+				}
+			} else {
+				a.modalOk("Changes saved.")
+			}
+
+		}
+	})
+	form.AddButton("[red]Delete", func() {
+		if err := a.store.DeleteNote(doc); err != nil {
+			if errors.Is(grpccli.ErrAuthFail, err) {
+				a.modalUnauthorized(err.Error())
+			} else {
+				a.modalErr(err.Error())
+			}
+		} else {
+			a.modalOk("Changes saved.")
+			go func() { _ = a.store.Update() }()
+		}
+	})
 	form.SetButtonsAlign(tview.AlignCenter)
 	form.SetCancelFunc(func() {
 		a.ui.SetFocus(list)
@@ -198,7 +255,7 @@ func (a *App) cardsForm(id string, form *tview.Form, list *tview.List) {
 	form.AddInputField("PIN", doc.Pin, 30, nil, func(text string) {
 		doc.Name = text
 	})
-	drawMetadata(form, &doc.Metadata)
+	a.drawMetadata(form, &doc.Metadata)
 	form.AddButton("Back", func() {
 		a.ui.SetFocus(list)
 	})
@@ -246,7 +303,7 @@ func (a *App) credentialsForm(id string, form *tview.Form, list *tview.List) {
 	form.AddInputField("Password", doc.Password, 30, nil, func(text string) {
 		doc.Password = text
 	})
-	drawMetadata(form, &doc.Metadata)
+	a.drawMetadata(form, &doc.Metadata)
 	form.AddButton("Back", func() {
 		a.ui.SetFocus(list)
 	})
@@ -285,11 +342,11 @@ func (a *App) saveMeta(form *tview.Form, meta *models.Meta, metadata *[]models.M
 		button.SetSelectedFunc(func() {
 			a.addMeta(form, metadata)
 		})
-		drawMetadata(form, metadata)
+		a.drawMetadata(form, metadata)
 	}
 }
 
-func drawMetadata(form *tview.Form, metadata *[]models.Meta) {
+func (a *App) drawMetadata(form *tview.Form, metadata *[]models.Meta) {
 	if idx := form.GetFormItemIndex("Metadata"); idx > -1 {
 		form.RemoveFormItem(idx)
 	}
@@ -297,9 +354,6 @@ func drawMetadata(form *tview.Form, metadata *[]models.Meta) {
 		form.RemoveFormItem(idx)
 	}
 	size := len(*metadata)
-	if size == 0 {
-		return
-	}
 	text := ""
 	options := make([]string, 0, size)
 	for i, v := range *metadata {
@@ -310,14 +364,25 @@ func drawMetadata(form *tview.Form, metadata *[]models.Meta) {
 		}
 	}
 	// metadata view size
-	if size > 5 {
+	switch {
+	case size > 5:
 		size = 5
+	case size == 0:
+		size = 1
 	}
+
 	form.AddTextView("Metadata", text, 30, size, true, true)
-	form.AddDropDown("[red]Delete Meta", options, -1, func(option string, optionIndex int) {
+	form.AddDropDown("Delete Meta", options, -1, func(option string, optionIndex int) {
+		//a.ui.SetFocus(form)
 		if optionIndex >= 0 {
 			*metadata = append((*metadata)[:optionIndex], (*metadata)[optionIndex+1:]...)
-			drawMetadata(form, metadata)
+			a.drawMetadata(form, metadata)
+			//a.ui.Draw()
 		}
 	})
+
+	p, ok := a.ui.GetFocus().(*tview.DropDown)
+	if ok && p.GetLabel() == "Delete Meta" {
+		a.ui.SetFocus(form)
+	}
 }

@@ -48,6 +48,7 @@ func (c *Controller) DeleteCard(ctx context.Context, card models.Card) error {
 	deleted := models.Card{
 		Id:     card.Id,
 		UserId: card.UserId,
+		Name:   card.Name,
 		Serial: s,
 		State:  models.StateDeleted,
 	}

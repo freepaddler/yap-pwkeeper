@@ -22,7 +22,7 @@ var (
 func main() {
 	exitCode := 0
 	defer func() {
-		log.SetOutput(os.Stderr)
+		//log.SetOutput(os.Stderr)
 		log.Printf("application exited with code: %d\n", exitCode)
 		os.Exit(exitCode)
 	}()
@@ -39,8 +39,14 @@ func main() {
 
 	// setup logging
 	if conf.Debug == 2 {
-		log.SetFlags(log.LstdFlags | log.Lshortfile)
+		log.SetFlags(log.LstdFlags | log.Llongfile)
 	}
+
+	f, err := os.Create("/tmp/pwkeeper.log")
+	if err != nil {
+		panic(err)
+	}
+	log.SetOutput(f)
 
 	// setup grpc client
 	log.Println("setup server connection...")
@@ -55,16 +61,20 @@ func main() {
 	_ = grpcClient.Login("chu", "Victor")
 
 	store := memstore.New(grpcClient)
+	//err = store.Update()
+	//if err != nil {
+	//	log.Println(err)
+	//}
 
 	ui := client.New(
 		client.WithAuthServer(grpcClient),
 		client.WithDataStore(store),
-		client.WithDebug(conf.Debug),
+		//client.WithDebug(conf.Debug),
 	)
 	log.Println("starting ui")
 
 	if err := ui.Run(); err != nil {
-		log.SetOutput(os.Stderr)
+		//log.SetOutput(os.Stderr)
 		log.Println("ui terminated")
 	}
 

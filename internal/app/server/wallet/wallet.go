@@ -51,13 +51,15 @@ func New(store DocStorage) *Controller {
 }
 
 func (c *Controller) GetUpdatesStream(ctx context.Context, userId string, minSerial int64, chData chan interface{}, chErr chan error) {
+	defer func() {
+		close(chData)
+		close(chErr)
+	}()
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("updates stream request")
 	maxSerial, err := serial.Next(ctx)
 	if err != nil {
-		close(chData)
 		chErr <- fmt.Errorf("unable to get new serial: %w", err)
-		close(chErr)
 		return
 	}
 	g, gCtx := errgroup.WithContext(ctx)
@@ -72,10 +74,8 @@ func (c *Controller) GetUpdatesStream(ctx context.Context, userId string, minSer
 	})
 
 	err = g.Wait()
-	close(chData)
 	if err != nil {
 		log.WithErr(err).Error("updates stream failed")
 		chErr <- err
 	}
-	close(chErr)
 }

@@ -42,7 +42,7 @@ func (w DocsHandlers) GetUpdateStream(request *pb.UpdateRequest, stream pb.Walle
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("update stream request")
 	chData := make(chan interface{})
-	chErr := make(chan error)
+	chErr := make(chan error, 1)
 	userId, _ := logger.GetUserId(ctx)
 	go w.docs.GetUpdatesStream(ctx, userId, request.GetSerial(), chData, chErr)
 	for {

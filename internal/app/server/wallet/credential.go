@@ -48,6 +48,7 @@ func (c *Controller) DeleteCredential(ctx context.Context, credential models.Cre
 	deleted := models.Credential{
 		Id:     credential.Id,
 		UserId: credential.UserId,
+		Name:   credential.Name,
 		Serial: s,
 		State:  models.StateDeleted,
 	}

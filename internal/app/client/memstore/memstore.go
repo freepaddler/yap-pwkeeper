@@ -1,7 +1,6 @@
 package memstore
 
 import (
-	"errors"
 	"sync"
 
 	"yap-pwkeeper/internal/pkg/models"
@@ -9,11 +8,10 @@ import (
 
 type DocServer interface {
 	GetUpdateStream(serial int64, chData chan interface{}, chErr chan error)
+	AddNote(note models.Note) error
+	UpdateNote(d models.Note) error
+	DeleteNote(d models.Note) error
 }
-
-var (
-	ErrAuthFail = errors.New("authorization failed, login required")
-)
 
 type Store struct {
 	notes       map[string]*models.Note
@@ -25,11 +23,16 @@ type Store struct {
 }
 
 func New(server DocServer) *Store {
-	return &Store{
-		serial:      -1,
-		notes:       make(map[string]*models.Note),
-		cards:       make(map[string]*models.Card),
-		credentials: make(map[string]*models.Credential),
-		server:      server,
+	store := &Store{
+		server: server,
 	}
+	store.Clear()
+	return store
+}
+
+func (s *Store) Clear() {
+	s.notes = make(map[string]*models.Note)
+	s.cards = make(map[string]*models.Card)
+	s.credentials = make(map[string]*models.Credential)
+	s.serial = -1
 }

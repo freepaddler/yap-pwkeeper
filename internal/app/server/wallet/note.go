@@ -48,6 +48,7 @@ func (c *Controller) DeleteNote(ctx context.Context, note models.Note) error {
 	deleted := models.Note{
 		Id:     note.Id,
 		UserId: note.UserId,
+		Name:   note.Name,
 		Serial: s,
 		State:  models.StateDeleted,
 	}

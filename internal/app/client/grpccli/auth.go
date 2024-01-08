@@ -28,23 +28,11 @@ func (c *Client) Register(login, password string) error {
 	token := &proto.Token{}
 	token, err := c.auth.Register(ctx, cred)
 	if err != nil {
-		return err
+		return parseErr(err)
 	}
 	c.setToken(token.GetToken())
 	return nil
 }
-
-//func (c *Client) register(login string, password string) (string, error) {
-//	ctx, cancel := context.WithTimeout(context.Background(), c.authTimeout)
-//	defer cancel()
-//	cred := &proto.LoginCredentials{
-//		Login:    login,
-//		Password: password,
-//	}
-//	token := &proto.Token{}
-//	token, err := c.auth.Register(ctx, cred)
-//	return token.GetToken(), err
-//}
 
 func (c *Client) Login(login, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.authTimeout)
@@ -56,23 +44,11 @@ func (c *Client) Login(login, password string) error {
 	token := &proto.Token{}
 	token, err := c.auth.Login(ctx, cred)
 	if err != nil {
-		return err
+		return parseErr(err)
 	}
 	c.setToken(token.GetToken())
 	return nil
 }
-
-//func (c *Client) login(login string, password string) (string, error) {
-//	ctx, cancel := context.WithTimeout(context.Background(), c.authTimeout)
-//	defer cancel()
-//	cred := &proto.LoginCredentials{
-//		Login:    login,
-//		Password: password,
-//	}
-//	token := &proto.Token{}
-//	token, err := c.auth.Login(ctx, cred)
-//	return token.GetToken(), err
-//}
 
 func (c *Client) getToken() string {
 	c.mu.RLock()

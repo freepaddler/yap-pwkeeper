@@ -1,9 +1,6 @@
 package client
 
 import (
-	"io"
-	"log"
-
 	"github.com/rivo/tview"
 
 	"yap-pwkeeper/internal/pkg/models"
@@ -20,11 +17,15 @@ type AuthServer interface {
 }
 
 type DataStore interface {
+	Clear()
 	Update() error
 	GetCardsList() []*models.Card
 	GetCredentialsList() []*models.Credential
 	GetNotesList() []*models.Note
 	GetNote(id string) *models.Note
+	AddNote(note models.Note) error
+	UpdateNote(note models.Note) error
+	DeleteNote(note models.Note) error
 	GetCard(id string) *models.Card
 	GetCredential(id string) *models.Credential
 }
@@ -45,7 +46,7 @@ func New(options ...func(a *App)) *App {
 	for _, opt := range options {
 		opt(app)
 	}
-	app.ui.SetRoot(app.pages, true).EnableMouse(true)
+	app.ui.SetRoot(app.pages, true).EnableMouse(false)
 	return app
 }
 
@@ -68,8 +69,8 @@ func WithDebug(level int) func(a *App) {
 }
 
 func (a *App) Run() error {
-	log.SetOutput(io.Discard)
-	a.welcomePage()
+	//log.SetOutput(io.Discard)
+	//a.welcomePage()
 	a.browser()
 	return a.ui.Run()
 }

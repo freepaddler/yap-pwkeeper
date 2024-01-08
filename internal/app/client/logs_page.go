@@ -8,6 +8,7 @@ import (
 )
 
 func (a *App) logsPage() {
+	//f := a.ui.GetFocus()
 	logview := tview.NewTextView().SetScrollable(true).ScrollToEnd()
 	log.SetOutput(logview)
 	log.Println("test message")
