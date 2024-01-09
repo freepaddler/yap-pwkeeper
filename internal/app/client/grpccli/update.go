@@ -16,7 +16,7 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 		close(chErr)
 	}()
 	log.Println("grpc update: started")
-	ctx, cancel := context.WithTimeout(context.Background(), c.docsTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.dataTimeout)
 	defer cancel()
 	ctx = metadata.AppendToOutgoingContext(ctx, "bearer", c.getToken())
 	req := &proto.UpdateRequest{Serial: serial}

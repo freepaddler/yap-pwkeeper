@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -38,15 +39,19 @@ func main() {
 	}
 
 	// setup logging
-	if conf.Debug == 2 {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
+	if conf.Log {
+		if conf.Logfile != "" {
+			f, err := os.Create(conf.Logfile)
+			if err != nil {
+				log.Printf("unable to open log file %s", conf.Logfile)
+			}
+			defer func() { _ = f.Close() }()
+			log.SetOutput(f)
+		}
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+	} else {
+		log.SetOutput(io.Discard)
 	}
-
-	f, err := os.Create("/tmp/pwkeeper.log")
-	if err != nil {
-		panic(err)
-	}
-	log.SetOutput(f)
 
 	// setup grpc client
 	log.Println("setup server connection...")
@@ -58,18 +63,10 @@ func main() {
 	}
 	defer func() { _ = grpcClient.Close() }()
 
-	_ = grpcClient.Login("chu", "Victor")
-
 	store := memstore.New(grpcClient)
-	//err = store.Update()
-	//if err != nil {
-	//	log.Println(err)
-	//}
 
 	ui := client.New(
-		client.WithAuthServer(grpcClient),
 		client.WithDataStore(store),
-		//client.WithDebug(conf.Debug),
 	)
 	log.Println("starting ui")
 

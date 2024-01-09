@@ -7,6 +7,12 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+const (
+	pageWelcome = "welcome"
+	pageLogin   = "cred"
+)
+
+// welcomePage creates welcome page and switches to it
 func (a *App) welcomePage() {
 	p := tview.NewModal().SetBackgroundColor(tcell.ColorBlack)
 	p.SetText("Welcome!")
@@ -21,19 +27,20 @@ func (a *App) welcomePage() {
 		default:
 			a.Stop()
 		}
-		a.pages.RemovePage("welcome")
+		a.pages.RemovePage(pageWelcome)
 	})
-	a.pages.AddPage("welcome", p, true, true)
-	a.pages.SwitchToPage("welcome")
+	a.pages.AddPage(pageWelcome, p, true, true)
+	a.pages.SwitchToPage(pageWelcome)
 }
 
+// loginPage user login page
 func (a *App) loginPage() {
 	login := models.UserCredentials{}
-	cFunc := func() {
+	cancelFunc := func() {
 		a.welcomePage()
-		a.pages.RemovePage("login")
+		a.pages.RemovePage(pageLogin)
 	}
-	form := tview.NewForm().SetCancelFunc(cFunc)
+	form := tview.NewForm().SetCancelFunc(cancelFunc)
 	form.AddInputField("login", "", 30, nil, func(text string) {
 		login.Login = text
 	})
@@ -41,31 +48,36 @@ func (a *App) loginPage() {
 		login.Password = text
 	})
 	form.AddButton("login", func() {
-		if err := a.authServer.Login(login.Login, login.Password); err != nil {
-			a.modalErr("login failed: " + err.Error())
+		if err := a.store.Login(login.Login, login.Password); err != nil {
+			a.modalErr(err.Error())
 			return
 		}
-		a.browser()
+		a.pages.RemovePage(pageLogin)
+		a.pages.SwitchToPage(pageRoot)
+		a.ui.SetFocus(a.categories)
+
 	})
 	form.AddButton("<<Back", func() {
-		cFunc()
+		cancelFunc()
 	})
+
 	form.SetButtonsAlign(tview.AlignCenter)
 	form.SetBorder(true)
 	form.SetTitle("Enter login credentials")
 	//return loginForm
-	a.pages.AddPage("login", center(44, 9, form), true, true)
-	a.pages.SwitchToPage("login")
+	a.pages.AddPage(pageLogin, center(44, 9, form), true, true)
+	a.pages.SwitchToPage(pageLogin)
 }
 
+// loginPage user registration page
 func (a *App) registerPage() {
 	login := models.UserCredentials{}
 	rePass := ""
-	cFunc := func() {
+	cancelFunc := func() {
 		a.welcomePage()
-		a.pages.RemovePage("register")
+		a.pages.RemovePage(pageLogin)
 	}
-	form := tview.NewForm().SetCancelFunc(cFunc)
+	form := tview.NewForm().SetCancelFunc(cancelFunc)
 	form.AddInputField("login", "", 30, nil, func(text string) {
 		login.Login = text
 	})
@@ -84,18 +96,25 @@ func (a *App) registerPage() {
 			a.modalErr("login is too short, use at least 3 symbols")
 			return
 		}
-		if err := a.authServer.Register(login.Login, login.Password); err != nil {
+		if err := a.store.Register(login.Login, login.Password); err != nil {
 			a.modalErr("Registration failed: " + err.Error())
 			return
 		}
-		a.browser()
+		if err := a.store.Login(login.Login, login.Password); err != nil {
+			a.modalErr("User registered, but: " + err.Error())
+			return
+		}
+		a.pages.RemovePage(pageLogin)
+		a.pages.SwitchToPage(pageRoot)
+		a.ui.SetFocus(a.categories)
+
 	})
 	form.AddButton("<<Back", func() {
-		cFunc()
+		cancelFunc()
 	})
 	form.SetButtonsAlign(tview.AlignCenter)
 	form.SetBorder(true)
 	form.SetTitle("New User Registration")
-	a.pages.AddPage("register", center(51, 11, form), true, true)
-	a.pages.SwitchToPage("register")
+	a.pages.AddPage(pageLogin, center(51, 11, form), true, true)
+	a.pages.SwitchToPage(pageLogin)
 }

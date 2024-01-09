@@ -1,29 +1,15 @@
 package client
 
 import (
-	"errors"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-
-	"yap-pwkeeper/internal/app/client/grpccli"
 )
 
-func (a *App) requestUpdate(focus *tview.List) {
-	var err error
-	a.pages.SwitchToPage(logsPage)
-	err = a.store.Update()
-	if err != nil {
-		if errors.Is(grpccli.ErrAuthFail, err) {
-			a.modalUnauthorized("Update failed: " + err.Error())
-		} else {
-			a.modalErr("Update failed: " + err.Error())
-		}
-	} else {
-		a.modalOk("Updates from server received")
-	}
-}
+const (
+	pageModal = "modal"
+)
 
+// modalErr shows error in modal window
 func (a *App) modalErr(text string) {
 	f := a.ui.GetFocus()
 	m := tview.NewModal().
@@ -31,40 +17,42 @@ func (a *App) modalErr(text string) {
 		SetText("Error: " + text).
 		AddButtons([]string{"Ok"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			a.pages.RemovePage("error")
+			a.pages.HidePage(pageModal)
 			a.ui.SetFocus(f)
 		})
-	a.pages.AddPage("error", m, true, true)
+	a.pages.AddPage(pageModal, m, true, true)
 }
 
-func (a *App) modalUnauthorized(text string) {
-	m := tview.NewModal().
-		SetBackgroundColor(tcell.ColorRed).
-		SetText("Error: " + text).
-		AddButtons([]string{"Ok"}).
-		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			a.store.Clear()
-			a.welcomePage()
-			a.pages.RemovePage("unauth")
-			a.pages.RemovePage(mainPage)
-		})
-	a.pages.AddPage("unauth", m, true, true)
-}
-
+// modalOk shows success modal window and switches to categories
 func (a *App) modalOk(text string) {
-	f := a.ui.GetFocus()
 	m := tview.NewModal().
-		SetBackgroundColor(tcell.ColorDarkGreen).
+		SetBackgroundColor(tcell.ColorDarkCyan).
 		SetText("OK: " + text).
 		AddButtons([]string{"Ok"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			a.pages.RemovePage("ok")
-			a.ui.SetFocus(f)
+			a.pages.RemovePage(pageModal)
+			a.ui.SetFocus(a.categories)
 		})
-	a.pages.AddPage("ok", m, true, true)
+	a.pages.AddPage(pageModal, m, true, true)
 }
 
+// modalUnauthorized shows Unauthorized modal and returns to application start
+func (a *App) modalUnauthorized() {
+	m := tview.NewModal().
+		SetBackgroundColor(tcell.ColorRed).
+		SetText("Session authorisation failed!\nYou need to Login again.\nAll data is cleared.").
+		AddButtons([]string{"Ok"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			a.pages.RemovePage(pageModal)
+			a.pages.HidePage(pageRoot)
+			a.welcomePage()
+		})
+	a.pages.AddPage(pageModal, m, true, true)
+}
+
+// modalExit is exit alarm window
 func (a *App) modalExit() {
+	f := a.ui.GetFocus()
 	m := tview.NewModal().
 		SetBackgroundColor(tcell.ColorDarkCyan).
 		SetText("Are you sure you want to quit?").
@@ -73,9 +61,10 @@ func (a *App) modalExit() {
 			if buttonIndex == 1 {
 				a.Stop()
 			}
-			a.pages.RemovePage("exit")
+			a.pages.RemovePage(pageModal)
+			a.ui.SetFocus(f)
 		})
-	a.pages.AddPage("exit", m, true, true)
+	a.pages.AddPage(pageModal, m, true, true)
 }
 
 func center(width, height int, p tview.Primitive) tview.Primitive {

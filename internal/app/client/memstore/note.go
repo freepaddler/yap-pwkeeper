@@ -1,30 +1,23 @@
 package memstore
 
 import (
-	"log"
 	"sort"
 
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// GetNote returns Note from store
 func (s *Store) GetNote(id string) *models.Note {
 	s.mu.RLock()
-	log.Println("Rlocked")
-	defer func() {
-		s.mu.RUnlock()
-		log.Println("Runlocked")
-	}()
+	defer s.mu.RUnlock()
 	return s.notes[id]
 }
 
+// GetNotesList returns Notes array from store sorted by Name
 func (s *Store) GetNotesList() []*models.Note {
 	list := make([]*models.Note, 0, len(s.notes))
 	s.mu.RLock()
-	log.Println("Rlocked")
-	defer func() {
-		s.mu.RUnlock()
-		log.Println("Runlocked")
-	}()
+	defer s.mu.RUnlock()
 	for _, v := range s.notes {
 		list = append(list, v)
 	}
@@ -34,14 +27,17 @@ func (s *Store) GetNotesList() []*models.Note {
 	return list
 }
 
-func (s *Store) AddNote(note models.Note) error {
-	return s.server.AddNote(note)
+// AddNote saves new Note to server
+func (s *Store) AddNote(d models.Note) error {
+	return s.checkAuthErr(s.server.AddNote(d))
 }
 
-func (s *Store) UpdateNote(note models.Note) error {
-	return s.server.UpdateNote(note)
+// UpdateNote updates Note on server
+func (s *Store) UpdateNote(d models.Note) error {
+	return s.checkAuthErr(s.server.AddNote(d))
 }
 
-func (s *Store) DeleteNote(note models.Note) error {
-	return s.server.DeleteNote(note)
+// DeleteNote deletes Note on server
+func (s *Store) DeleteNote(d models.Note) error {
+	return s.checkAuthErr(s.server.AddNote(d))
 }

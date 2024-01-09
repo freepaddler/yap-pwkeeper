@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	defaultDebugLevel = "0"
-	defaultAddress    = "127.0.0.1:3200"
+	defaultAddress = "127.0.0.1:3200"
 )
 
 type Config struct {
-	Debug   int
+	Logfile string
+	Log     bool
 	Version bool
 	Address string
 }
@@ -22,8 +22,12 @@ func New() *Config {
 	var c Config
 	kingpin.UsageTemplate(kingpin.CompactUsageTemplate)
 	kingpin.CommandLine.HelpFlag.Short('h')
-	kingpin.Flag("debug", "debug modes: 0..2").
-		IntVar(&c.Debug)
+	kingpin.Flag("log", "enable logging").
+		Short('l').
+		BoolVar(&c.Log)
+	kingpin.Flag("logfile", "log file name").
+		Envar("LOGFILE").
+		StringVar(&c.Logfile)
 	kingpin.Flag("version", "print version").Short('v').BoolVar(&c.Version)
 	kingpin.Flag("address", "server address host:port").
 		Short('a').

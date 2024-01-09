@@ -10,9 +10,10 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddNote saves new Note on server
 func (c *Client) AddNote(d models.Note) error {
 	log.Println("grpc add note request")
-	ctx, cancel := context.WithTimeout(context.Background(), c.docsTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.dataTimeout)
 	defer cancel()
 	ctx = metadata.AppendToOutgoingContext(ctx, "bearer", c.getToken())
 	req := proto.FromNote(d)
@@ -23,9 +24,10 @@ func (c *Client) AddNote(d models.Note) error {
 	return nil
 }
 
+// UpdateNote updates Note on server
 func (c *Client) UpdateNote(d models.Note) error {
 	log.Println("grpc update note request")
-	ctx, cancel := context.WithTimeout(context.Background(), c.docsTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.dataTimeout)
 	defer cancel()
 	ctx = metadata.AppendToOutgoingContext(ctx, "bearer", c.getToken())
 	req := proto.FromNote(d)
@@ -36,9 +38,10 @@ func (c *Client) UpdateNote(d models.Note) error {
 	return nil
 }
 
+// DeleteNote deletes Note on server
 func (c *Client) DeleteNote(d models.Note) error {
 	log.Println("grpc delete note request")
-	ctx, cancel := context.WithTimeout(context.Background(), c.docsTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.dataTimeout)
 	defer cancel()
 	ctx = metadata.AppendToOutgoingContext(ctx, "bearer", c.getToken())
 	req := proto.FromNote(d)
