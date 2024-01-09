@@ -19,7 +19,7 @@ type GRCPServer struct {
 	Server             *grpc.Server
 	address            string
 	auth               *AuthHandlers
-	wallet             *DocsHandlers
+	docs               *DocsHandlers
 	unaryInterceptors  []grpc.UnaryServerInterceptor
 	streamInterceptors []grpc.StreamServerInterceptor
 }
@@ -53,7 +53,7 @@ func New(opts ...func(gs *GRCPServer)) *GRCPServer {
 		grpc.ChainStreamInterceptor(gs.streamInterceptors...),
 	)
 	pb.RegisterAuthServer(gs.Server, gs.auth)
-	pb.RegisterDocsServer(gs.Server, gs.wallet)
+	pb.RegisterDocsServer(gs.Server, gs.docs)
 	return gs
 }
 
@@ -71,7 +71,7 @@ func WithAuthHandlers(h *AuthHandlers) func(gs *GRCPServer) {
 
 func WithDocsHandlers(h *DocsHandlers) func(gs *GRCPServer) {
 	return func(gs *GRCPServer) {
-		gs.wallet = h
+		gs.docs = h
 	}
 }
 

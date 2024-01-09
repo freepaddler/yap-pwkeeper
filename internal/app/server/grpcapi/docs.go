@@ -24,6 +24,11 @@ type Docs interface {
 	DeleteCredential(ctx context.Context, credential models.Credential) error
 	UpdateCredential(ctx context.Context, credential models.Credential) error
 
+	AddFile(ctx context.Context, file models.File) error
+	DeleteFile(ctx context.Context, file models.File) error
+	UpdateFile(ctx context.Context, file models.File) error
+	GetFile(ctx context.Context, docId string, userId string) (models.File, error)
+
 	GetUpdatesStream(ctx context.Context, userId string, minSerial int64, chData chan interface{}, chErr chan error)
 }
 

@@ -22,6 +22,7 @@ const (
 	collNotes                     = "notes"
 	collCredentials               = "credentials"
 	collCards                     = "cards"
+	collFiles                     = "files"
 )
 
 var (

@@ -2,6 +2,7 @@ package proto
 
 import (
 	"errors"
+	"fmt"
 
 	"yap-pwkeeper/internal/pkg/models"
 )
@@ -114,5 +115,36 @@ func FromCard(x models.Card) *Card {
 		Pin:        x.Pin,
 		Code:       x.Code,
 		Metadata:   fromMetadata(x.Metadata),
+	}
+}
+
+func (x *File) ToFile() (models.File, error) {
+	if x.Name == "" {
+		return models.File{}, fmt.Errorf("%w: Name is empty", ErrBadRequest)
+	}
+	if x.Filename == "" {
+		return models.File{}, fmt.Errorf("%w: Fileame is empty", ErrBadRequest)
+	}
+	file := models.File{
+		Id:       x.Id,
+		Serial:   x.Serial,
+		Name:     x.Name,
+		Filename: x.Filename,
+		Size:     x.Size,
+		Data:     make([]byte, 0),
+		Metadata: toMetadata(x.Metadata),
+	}
+	return file, nil
+}
+
+func FromFile(x models.File) *File {
+	return &File{
+		Id:       x.Id,
+		Serial:   x.Serial,
+		State:    x.State,
+		Name:     x.Name,
+		Filename: x.Filename,
+		Size:     x.Size,
+		Metadata: fromMetadata(x.Metadata),
 	}
 }

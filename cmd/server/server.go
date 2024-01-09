@@ -98,8 +98,8 @@ func main() {
 	// setup grpc
 	gs := grpcapi.New(
 		grpcapi.WithAddress(conf.Address),
-		grpcapi.WithUnaryInterceptors(interceptors.AuthUnaryServer(auth.Validate, "Wallet/")),
-		grpcapi.WithStreamInterceptors(interceptors.AuthStreamServer(auth.Validate, "Wallet/")),
+		grpcapi.WithUnaryInterceptors(interceptors.AuthUnaryServer(auth.Validate, "Docs/")),
+		grpcapi.WithStreamInterceptors(interceptors.AuthStreamServer(auth.Validate, "Docs/")),
 		grpcapi.WithAuthHandlers(grpcapi.NewAuthHandlers(auth)),
 		grpcapi.WithDocsHandlers(grpcapi.NewDocsHandlers(docs)),
 	)

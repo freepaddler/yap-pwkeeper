@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"testing"
-	"time"
 )
 
 type Note struct {
@@ -49,14 +51,36 @@ func receiver2(ch chan interface{}) {
 }
 
 func Test_just(t *testing.T) {
-	s := make(chan interface{})
-	go receiver2(s)
-	i := 4
-	s <- i
-	n := Note{note: "this is a note"}
-	c := Card{card: "this is a card"}
-	s <- n
-	s <- c
-	close(s)
-	time.Sleep(time.Second)
+
+	file := "/tmp/test/small.dat"
+
+	f, err := os.Open(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	for {
+		bytes := make([]byte, 1<<18)
+		n, err := f.Read(bytes)
+		log.Printf("read: %d", n)
+		if err == io.EOF {
+			log.Println("EOF")
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	//s := make(chan interface{})
+	//go receiver2(s)
+	//i := 4
+	//s <- i
+	//n := Note{note: "this is a note"}
+	//c := Card{card: "this is a card"}
+	//s <- n
+	//s <- c
+	//close(s)
+	//time.Sleep(time.Second)
 }

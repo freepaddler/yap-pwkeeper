@@ -39,3 +39,16 @@ type Card struct {
 	Metadata   []Meta `bson:"metadata"`
 	State      string `bson:"state"`
 }
+
+type File struct {
+	Id       string `bson:"_id,omitempty"`
+	UserId   string `bson:"user_id"`
+	Serial   int64  `bson:"serial"`
+	Name     string `bson:"name"`
+	Filename string `bson:"filename"`
+	Size     int64  `bson:"size"`
+	Sha265   string `bson:"sha265"`
+	Data     []byte `bson:"data"`
+	Metadata []Meta `bson:"metadata"`
+	State    string `bson:"state"`
+}

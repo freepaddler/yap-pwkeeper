@@ -193,6 +193,10 @@ const (
 	Docs_AddCard_FullMethodName          = "/grpcapi.Docs/AddCard"
 	Docs_DeleteCard_FullMethodName       = "/grpcapi.Docs/DeleteCard"
 	Docs_UpdateCard_FullMethodName       = "/grpcapi.Docs/UpdateCard"
+	Docs_AddFile_FullMethodName          = "/grpcapi.Docs/AddFile"
+	Docs_DeleteFile_FullMethodName       = "/grpcapi.Docs/DeleteFile"
+	Docs_UpdateFile_FullMethodName       = "/grpcapi.Docs/UpdateFile"
+	Docs_GetFile_FullMethodName          = "/grpcapi.Docs/GetFile"
 )
 
 // DocsClient is the client API for Docs service.
@@ -209,6 +213,10 @@ type DocsClient interface {
 	AddCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error)
 	DeleteCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error)
 	UpdateCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error)
+	AddFile(ctx context.Context, opts ...grpc.CallOption) (Docs_AddFileClient, error)
+	DeleteFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*Empty, error)
+	UpdateFile(ctx context.Context, opts ...grpc.CallOption) (Docs_UpdateFileClient, error)
+	GetFile(ctx context.Context, in *DocumentRequest, opts ...grpc.CallOption) (Docs_GetFileClient, error)
 }
 
 type docsClient struct {
@@ -332,6 +340,115 @@ func (c *docsClient) UpdateCard(ctx context.Context, in *Card, opts ...grpc.Call
 	return out, nil
 }
 
+func (c *docsClient) AddFile(ctx context.Context, opts ...grpc.CallOption) (Docs_AddFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Docs_ServiceDesc.Streams[1], Docs_AddFile_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &docsAddFileClient{stream}
+	return x, nil
+}
+
+type Docs_AddFileClient interface {
+	Send(*FileStream) error
+	CloseAndRecv() (*Empty, error)
+	grpc.ClientStream
+}
+
+type docsAddFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *docsAddFileClient) Send(m *FileStream) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *docsAddFileClient) CloseAndRecv() (*Empty, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Empty)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *docsClient) DeleteFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Docs_DeleteFile_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docsClient) UpdateFile(ctx context.Context, opts ...grpc.CallOption) (Docs_UpdateFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Docs_ServiceDesc.Streams[2], Docs_UpdateFile_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &docsUpdateFileClient{stream}
+	return x, nil
+}
+
+type Docs_UpdateFileClient interface {
+	Send(*FileStream) error
+	CloseAndRecv() (*Empty, error)
+	grpc.ClientStream
+}
+
+type docsUpdateFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *docsUpdateFileClient) Send(m *FileStream) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *docsUpdateFileClient) CloseAndRecv() (*Empty, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Empty)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *docsClient) GetFile(ctx context.Context, in *DocumentRequest, opts ...grpc.CallOption) (Docs_GetFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Docs_ServiceDesc.Streams[3], Docs_GetFile_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &docsGetFileClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Docs_GetFileClient interface {
+	Recv() (*FileStream, error)
+	grpc.ClientStream
+}
+
+type docsGetFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *docsGetFileClient) Recv() (*FileStream, error) {
+	m := new(FileStream)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DocsServer is the server API for Docs service.
 // All implementations must embed UnimplementedDocsServer
 // for forward compatibility
@@ -346,6 +463,10 @@ type DocsServer interface {
 	AddCard(context.Context, *Card) (*Empty, error)
 	DeleteCard(context.Context, *Card) (*Empty, error)
 	UpdateCard(context.Context, *Card) (*Empty, error)
+	AddFile(Docs_AddFileServer) error
+	DeleteFile(context.Context, *File) (*Empty, error)
+	UpdateFile(Docs_UpdateFileServer) error
+	GetFile(*DocumentRequest, Docs_GetFileServer) error
 	mustEmbedUnimplementedDocsServer()
 }
 
@@ -382,6 +503,18 @@ func (UnimplementedDocsServer) DeleteCard(context.Context, *Card) (*Empty, error
 }
 func (UnimplementedDocsServer) UpdateCard(context.Context, *Card) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCard not implemented")
+}
+func (UnimplementedDocsServer) AddFile(Docs_AddFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method AddFile not implemented")
+}
+func (UnimplementedDocsServer) DeleteFile(context.Context, *File) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
+}
+func (UnimplementedDocsServer) UpdateFile(Docs_UpdateFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method UpdateFile not implemented")
+}
+func (UnimplementedDocsServer) GetFile(*DocumentRequest, Docs_GetFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetFile not implemented")
 }
 func (UnimplementedDocsServer) mustEmbedUnimplementedDocsServer() {}
 
@@ -579,6 +712,97 @@ func _Docs_UpdateCard_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Docs_AddFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(DocsServer).AddFile(&docsAddFileServer{stream})
+}
+
+type Docs_AddFileServer interface {
+	SendAndClose(*Empty) error
+	Recv() (*FileStream, error)
+	grpc.ServerStream
+}
+
+type docsAddFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *docsAddFileServer) SendAndClose(m *Empty) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *docsAddFileServer) Recv() (*FileStream, error) {
+	m := new(FileStream)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _Docs_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(File)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocsServer).DeleteFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Docs_DeleteFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocsServer).DeleteFile(ctx, req.(*File))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Docs_UpdateFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(DocsServer).UpdateFile(&docsUpdateFileServer{stream})
+}
+
+type Docs_UpdateFileServer interface {
+	SendAndClose(*Empty) error
+	Recv() (*FileStream, error)
+	grpc.ServerStream
+}
+
+type docsUpdateFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *docsUpdateFileServer) SendAndClose(m *Empty) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *docsUpdateFileServer) Recv() (*FileStream, error) {
+	m := new(FileStream)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _Docs_GetFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(DocumentRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(DocsServer).GetFile(m, &docsGetFileServer{stream})
+}
+
+type Docs_GetFileServer interface {
+	Send(*FileStream) error
+	grpc.ServerStream
+}
+
+type docsGetFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *docsGetFileServer) Send(m *FileStream) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Docs_ServiceDesc is the grpc.ServiceDesc for Docs service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -622,11 +846,30 @@ var Docs_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "UpdateCard",
 			Handler:    _Docs_UpdateCard_Handler,
 		},
+		{
+			MethodName: "DeleteFile",
+			Handler:    _Docs_DeleteFile_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "GetUpdateStream",
 			Handler:       _Docs_GetUpdateStream_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "AddFile",
+			Handler:       _Docs_AddFile_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "UpdateFile",
+			Handler:       _Docs_UpdateFile_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "GetFile",
+			Handler:       _Docs_GetFile_Handler,
 			ServerStreams: true,
 		},
 	},

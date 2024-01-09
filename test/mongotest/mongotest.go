@@ -117,12 +117,30 @@ func readchunk() {
 }
 
 func main() {
+
+	h1 := sha256.New()
+	var b1 []byte
+	b2 := []byte("sdasasd")
+
+	log.Println(len(b1), b1)
+	h1.Write(b1)
+	log.Printf("%x", h1.Sum(nil))
+	h1.Write(b1)
+	log.Printf("%x", h1.Sum(nil))
+	h1.Write(b2)
+	log.Printf("%x", h1.Sum(nil))
+	h1.Write(b1)
+	log.Printf("%x", h1.Sum(nil))
+
+	return
+
 	f1, err := os.Open(orig)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f1.Close()
 	h := sha256.New()
+
 	_, err = io.Copy(h, f1)
 	if err != nil {
 		log.Fatal(err)

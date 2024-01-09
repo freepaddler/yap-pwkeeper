@@ -35,6 +35,13 @@ type DocStorage interface {
 	GetCredential(ctx context.Context, docId string, userId string) (models.Credential, error)
 	ModifyCredential(ctx context.Context, credential models.Credential) error
 	GetCredentialsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error
+
+	AddFile(ctx context.Context, file models.File) (string, error)
+	GetFile(ctx context.Context, docId string, userId string) (models.File, error)
+	GetFileInfo(ctx context.Context, docId string, userId string) (models.File, error)
+	ModifyFile(ctx context.Context, file models.File) error
+	ModifyFileInfo(ctx context.Context, file models.File) error
+	GetFilesInfoStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error
 }
 
 type Controller struct {

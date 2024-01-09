@@ -53,6 +53,32 @@ message Card {
   string code = 10;
 }
 
+message FileChunk {
+  bool eof = 1;
+  bytes data = 2;
+}
+
+message File {
+  string id = 1;
+  int64 serial = 2;
+  string state = 3;
+  string name = 4;
+  repeated Meta metadata = 5;
+  string filename = 6;
+  int64 size = 7;
+}
+
+message DocumentRequest {
+  string id = 1;
+}
+
+message FileStream {
+  oneof chunkedFile {
+    File file = 1;
+    FileChunk chunk = 2;
+  }
+}
+
 message UpdateRequest {
   int64 serial = 1;
 }
@@ -62,6 +88,7 @@ message UpdateResponse {
     Note note = 1;
     Credential credential = 2;
     Card card = 3;
+    File file = 4;
   }
 }
 
@@ -85,4 +112,9 @@ service Docs {
   rpc AddCard(Card) returns (Empty);
   rpc DeleteCard(Card) returns (Empty);
   rpc UpdateCard(Card) returns (Empty);
+
+  rpc AddFile(stream FileStream) returns (Empty);
+  rpc DeleteFile(File) returns (Empty);
+  rpc UpdateFile(stream FileStream) returns (Empty);
+  rpc GetFile(DocumentRequest) returns (stream FileStream);
 }
