@@ -33,13 +33,13 @@ func New(store UserStorage) *Controller {
 	return c
 }
 
-func (c *Controller) Register(ctx context.Context, cred models.UserCredentials) (string, error) {
+func (c *Controller) Register(ctx context.Context, cred models.UserCredentials) error {
 	log := logger.Log().WithCtxRequestId(ctx).With("login", cred.Login)
 	log.Debug("new user registration")
 	user := models.User{}
 	pwHash, err := bcrypt.GenerateFromPassword([]byte(cred.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate passsword hash: %w", err)
+		return fmt.Errorf("failed to generate passsword hash: %w", err)
 	}
 	user, err = c.store.AddUser(ctx,
 		models.User{
@@ -49,10 +49,10 @@ func (c *Controller) Register(ctx context.Context, cred models.UserCredentials) 
 		})
 	if err != nil {
 		log.Warnf("user registration failed: %s", err.Error())
-		return "", err
+		return err
 	}
 	log.With("userId", user.Id).Info("user registration succeeded")
-	return newSession(ctx, user.Id)
+	return nil
 }
 
 func (c *Controller) Login(ctx context.Context, cred models.UserCredentials) (string, error) {

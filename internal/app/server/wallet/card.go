@@ -19,6 +19,7 @@ func (c *Controller) AddCard(ctx context.Context, card models.Card) error {
 	}
 	card.Serial = s
 	card.State = models.StateActive
+	card.Id = ""
 	oid, err := c.store.AddCard(ctx, card)
 	if err != nil {
 		logger.Log().Warnf("add card failed: %s", err.Error())

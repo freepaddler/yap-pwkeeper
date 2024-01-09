@@ -19,6 +19,7 @@ func (c *Controller) AddNote(ctx context.Context, note models.Note) error {
 	}
 	note.Serial = s
 	note.State = models.StateActive
+	note.Id = ""
 	oid, err := c.store.AddNote(ctx, note)
 	if err != nil {
 		logger.Log().Warnf("add note failed: %s", err.Error())

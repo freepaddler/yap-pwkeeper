@@ -19,6 +19,7 @@ func (c *Controller) AddCredential(ctx context.Context, credential models.Creden
 	}
 	credential.Serial = s
 	credential.State = models.StateActive
+	credential.Id = ""
 	oid, err := c.store.AddCredential(ctx, credential)
 	if err != nil {
 		logger.Log().Warnf("add credential failed: %s", err.Error())

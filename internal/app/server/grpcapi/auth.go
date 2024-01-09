@@ -15,7 +15,7 @@ import (
 )
 
 type AAA interface {
-	Register(ctx context.Context, cred models.UserCredentials) (string, error)
+	Register(ctx context.Context, cred models.UserCredentials) error
 	Login(ctx context.Context, cred models.UserCredentials) (string, error)
 	Refresh(ctx context.Context, token string) (string, error)
 	Validate(ctx context.Context, token string) bool
@@ -30,22 +30,21 @@ func NewAuthHandlers(auth AAA) *AuthHandlers {
 	return &AuthHandlers{auth: auth}
 }
 
-func (a AuthHandlers) Register(ctx context.Context, in *proto.LoginCredentials) (*proto.Token, error) {
+func (a AuthHandlers) Register(ctx context.Context, in *proto.LoginCredentials) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).With("login", in.Login)
 	log.Debug("user registration request")
-	response := &proto.Token{}
+	response := &proto.Empty{}
 	credentials := models.UserCredentials{
 		Login:    in.Login,
 		Password: in.Password,
 	}
-	token, err := a.auth.Register(ctx, credentials)
+	err := a.auth.Register(ctx, credentials)
 	switch {
 	case errors.Is(aaa.ErrDuplicate, err):
 		return response, status.Error(codes.AlreadyExists, aaa.ErrDuplicate.Error())
 	case err != nil:
 		return response, status.Error(codes.Internal, "server error")
 	}
-	response.Token = token
 	return response, nil
 }
 

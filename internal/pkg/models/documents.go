@@ -36,8 +36,6 @@ type Card struct {
 	Expires    string `bson:"expires"`
 	Pin        string `bson:"pin"`
 	Code       string `bson:"code"`
-	// TODO: delete password
-	Password string `bson:"password"`
-	Metadata []Meta `bson:"metadata"`
-	State    string `bson:"state"`
+	Metadata   []Meta `bson:"metadata"`
+	State      string `bson:"state"`
 }

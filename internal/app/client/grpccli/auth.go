@@ -21,13 +21,8 @@ func (c *Client) Register(login, password string) error {
 		Login:    login,
 		Password: password,
 	}
-	token := &proto.Token{}
-	token, err := c.auth.Register(ctx, cred)
-	if err != nil {
-		return parseErr(err)
-	}
-	c.setToken(token.GetToken())
-	return nil
+	_, err := c.auth.Register(ctx, cred)
+	return parseErr(err)
 }
 
 // Login logins to server and starts token update routine

@@ -34,10 +34,10 @@ func (s *Store) AddNote(d models.Note) error {
 
 // UpdateNote updates Note on server
 func (s *Store) UpdateNote(d models.Note) error {
-	return s.checkAuthErr(s.server.AddNote(d))
+	return s.checkAuthErr(s.server.UpdateNote(d))
 }
 
 // DeleteNote deletes Note on server
 func (s *Store) DeleteNote(d models.Note) error {
-	return s.checkAuthErr(s.server.AddNote(d))
+	return s.checkAuthErr(s.server.DeleteNote(d))
 }
