@@ -183,23 +183,23 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	Wallet_GetUpdateStream_FullMethodName  = "/grpcapi.Wallet/GetUpdateStream"
-	Wallet_AddNote_FullMethodName          = "/grpcapi.Wallet/AddNote"
-	Wallet_DeleteNote_FullMethodName       = "/grpcapi.Wallet/DeleteNote"
-	Wallet_UpdateNote_FullMethodName       = "/grpcapi.Wallet/UpdateNote"
-	Wallet_AddCredential_FullMethodName    = "/grpcapi.Wallet/AddCredential"
-	Wallet_DeleteCredential_FullMethodName = "/grpcapi.Wallet/DeleteCredential"
-	Wallet_UpdateCredential_FullMethodName = "/grpcapi.Wallet/UpdateCredential"
-	Wallet_AddCard_FullMethodName          = "/grpcapi.Wallet/AddCard"
-	Wallet_DeleteCard_FullMethodName       = "/grpcapi.Wallet/DeleteCard"
-	Wallet_UpdateCard_FullMethodName       = "/grpcapi.Wallet/UpdateCard"
+	Docs_GetUpdateStream_FullMethodName  = "/grpcapi.Docs/GetUpdateStream"
+	Docs_AddNote_FullMethodName          = "/grpcapi.Docs/AddNote"
+	Docs_DeleteNote_FullMethodName       = "/grpcapi.Docs/DeleteNote"
+	Docs_UpdateNote_FullMethodName       = "/grpcapi.Docs/UpdateNote"
+	Docs_AddCredential_FullMethodName    = "/grpcapi.Docs/AddCredential"
+	Docs_DeleteCredential_FullMethodName = "/grpcapi.Docs/DeleteCredential"
+	Docs_UpdateCredential_FullMethodName = "/grpcapi.Docs/UpdateCredential"
+	Docs_AddCard_FullMethodName          = "/grpcapi.Docs/AddCard"
+	Docs_DeleteCard_FullMethodName       = "/grpcapi.Docs/DeleteCard"
+	Docs_UpdateCard_FullMethodName       = "/grpcapi.Docs/UpdateCard"
 )
 
-// WalletClient is the client API for Wallet service.
+// DocsClient is the client API for Docs service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type WalletClient interface {
-	GetUpdateStream(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Wallet_GetUpdateStreamClient, error)
+type DocsClient interface {
+	GetUpdateStream(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Docs_GetUpdateStreamClient, error)
 	AddNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
 	DeleteNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
 	UpdateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error)
@@ -211,20 +211,20 @@ type WalletClient interface {
 	UpdateCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error)
 }
 
-type walletClient struct {
+type docsClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewWalletClient(cc grpc.ClientConnInterface) WalletClient {
-	return &walletClient{cc}
+func NewDocsClient(cc grpc.ClientConnInterface) DocsClient {
+	return &docsClient{cc}
 }
 
-func (c *walletClient) GetUpdateStream(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Wallet_GetUpdateStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Wallet_ServiceDesc.Streams[0], Wallet_GetUpdateStream_FullMethodName, opts...)
+func (c *docsClient) GetUpdateStream(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (Docs_GetUpdateStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Docs_ServiceDesc.Streams[0], Docs_GetUpdateStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &walletGetUpdateStreamClient{stream}
+	x := &docsGetUpdateStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -234,16 +234,16 @@ func (c *walletClient) GetUpdateStream(ctx context.Context, in *UpdateRequest, o
 	return x, nil
 }
 
-type Wallet_GetUpdateStreamClient interface {
+type Docs_GetUpdateStreamClient interface {
 	Recv() (*UpdateResponse, error)
 	grpc.ClientStream
 }
 
-type walletGetUpdateStreamClient struct {
+type docsGetUpdateStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *walletGetUpdateStreamClient) Recv() (*UpdateResponse, error) {
+func (x *docsGetUpdateStreamClient) Recv() (*UpdateResponse, error) {
 	m := new(UpdateResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -251,92 +251,92 @@ func (x *walletGetUpdateStreamClient) Recv() (*UpdateResponse, error) {
 	return m, nil
 }
 
-func (c *walletClient) AddNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) AddNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_AddNote_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_AddNote_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) DeleteNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) DeleteNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_DeleteNote_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_DeleteNote_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) UpdateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) UpdateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_UpdateNote_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_UpdateNote_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) AddCredential(ctx context.Context, in *Credential, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) AddCredential(ctx context.Context, in *Credential, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_AddCredential_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_AddCredential_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) DeleteCredential(ctx context.Context, in *Credential, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) DeleteCredential(ctx context.Context, in *Credential, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_DeleteCredential_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_DeleteCredential_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) UpdateCredential(ctx context.Context, in *Credential, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) UpdateCredential(ctx context.Context, in *Credential, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_UpdateCredential_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_UpdateCredential_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) AddCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) AddCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_AddCard_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_AddCard_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) DeleteCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) DeleteCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_DeleteCard_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_DeleteCard_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *walletClient) UpdateCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error) {
+func (c *docsClient) UpdateCard(ctx context.Context, in *Card, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, Wallet_UpdateCard_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Docs_UpdateCard_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// WalletServer is the server API for Wallet service.
-// All implementations must embed UnimplementedWalletServer
+// DocsServer is the server API for Docs service.
+// All implementations must embed UnimplementedDocsServer
 // for forward compatibility
-type WalletServer interface {
-	GetUpdateStream(*UpdateRequest, Wallet_GetUpdateStreamServer) error
+type DocsServer interface {
+	GetUpdateStream(*UpdateRequest, Docs_GetUpdateStreamServer) error
 	AddNote(context.Context, *Note) (*Empty, error)
 	DeleteNote(context.Context, *Note) (*Empty, error)
 	UpdateNote(context.Context, *Note) (*Empty, error)
@@ -346,287 +346,287 @@ type WalletServer interface {
 	AddCard(context.Context, *Card) (*Empty, error)
 	DeleteCard(context.Context, *Card) (*Empty, error)
 	UpdateCard(context.Context, *Card) (*Empty, error)
-	mustEmbedUnimplementedWalletServer()
+	mustEmbedUnimplementedDocsServer()
 }
 
-// UnimplementedWalletServer must be embedded to have forward compatible implementations.
-type UnimplementedWalletServer struct {
+// UnimplementedDocsServer must be embedded to have forward compatible implementations.
+type UnimplementedDocsServer struct {
 }
 
-func (UnimplementedWalletServer) GetUpdateStream(*UpdateRequest, Wallet_GetUpdateStreamServer) error {
+func (UnimplementedDocsServer) GetUpdateStream(*UpdateRequest, Docs_GetUpdateStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetUpdateStream not implemented")
 }
-func (UnimplementedWalletServer) AddNote(context.Context, *Note) (*Empty, error) {
+func (UnimplementedDocsServer) AddNote(context.Context, *Note) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddNote not implemented")
 }
-func (UnimplementedWalletServer) DeleteNote(context.Context, *Note) (*Empty, error) {
+func (UnimplementedDocsServer) DeleteNote(context.Context, *Note) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteNote not implemented")
 }
-func (UnimplementedWalletServer) UpdateNote(context.Context, *Note) (*Empty, error) {
+func (UnimplementedDocsServer) UpdateNote(context.Context, *Note) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateNote not implemented")
 }
-func (UnimplementedWalletServer) AddCredential(context.Context, *Credential) (*Empty, error) {
+func (UnimplementedDocsServer) AddCredential(context.Context, *Credential) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddCredential not implemented")
 }
-func (UnimplementedWalletServer) DeleteCredential(context.Context, *Credential) (*Empty, error) {
+func (UnimplementedDocsServer) DeleteCredential(context.Context, *Credential) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCredential not implemented")
 }
-func (UnimplementedWalletServer) UpdateCredential(context.Context, *Credential) (*Empty, error) {
+func (UnimplementedDocsServer) UpdateCredential(context.Context, *Credential) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCredential not implemented")
 }
-func (UnimplementedWalletServer) AddCard(context.Context, *Card) (*Empty, error) {
+func (UnimplementedDocsServer) AddCard(context.Context, *Card) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddCard not implemented")
 }
-func (UnimplementedWalletServer) DeleteCard(context.Context, *Card) (*Empty, error) {
+func (UnimplementedDocsServer) DeleteCard(context.Context, *Card) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCard not implemented")
 }
-func (UnimplementedWalletServer) UpdateCard(context.Context, *Card) (*Empty, error) {
+func (UnimplementedDocsServer) UpdateCard(context.Context, *Card) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCard not implemented")
 }
-func (UnimplementedWalletServer) mustEmbedUnimplementedWalletServer() {}
+func (UnimplementedDocsServer) mustEmbedUnimplementedDocsServer() {}
 
-// UnsafeWalletServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to WalletServer will
+// UnsafeDocsServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DocsServer will
 // result in compilation errors.
-type UnsafeWalletServer interface {
-	mustEmbedUnimplementedWalletServer()
+type UnsafeDocsServer interface {
+	mustEmbedUnimplementedDocsServer()
 }
 
-func RegisterWalletServer(s grpc.ServiceRegistrar, srv WalletServer) {
-	s.RegisterService(&Wallet_ServiceDesc, srv)
+func RegisterDocsServer(s grpc.ServiceRegistrar, srv DocsServer) {
+	s.RegisterService(&Docs_ServiceDesc, srv)
 }
 
-func _Wallet_GetUpdateStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Docs_GetUpdateStream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(UpdateRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(WalletServer).GetUpdateStream(m, &walletGetUpdateStreamServer{stream})
+	return srv.(DocsServer).GetUpdateStream(m, &docsGetUpdateStreamServer{stream})
 }
 
-type Wallet_GetUpdateStreamServer interface {
+type Docs_GetUpdateStreamServer interface {
 	Send(*UpdateResponse) error
 	grpc.ServerStream
 }
 
-type walletGetUpdateStreamServer struct {
+type docsGetUpdateStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *walletGetUpdateStreamServer) Send(m *UpdateResponse) error {
+func (x *docsGetUpdateStreamServer) Send(m *UpdateResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Wallet_AddNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_AddNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Note)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).AddNote(ctx, in)
+		return srv.(DocsServer).AddNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_AddNote_FullMethodName,
+		FullMethod: Docs_AddNote_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).AddNote(ctx, req.(*Note))
+		return srv.(DocsServer).AddNote(ctx, req.(*Note))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_DeleteNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_DeleteNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Note)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).DeleteNote(ctx, in)
+		return srv.(DocsServer).DeleteNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_DeleteNote_FullMethodName,
+		FullMethod: Docs_DeleteNote_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).DeleteNote(ctx, req.(*Note))
+		return srv.(DocsServer).DeleteNote(ctx, req.(*Note))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_UpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_UpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Note)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).UpdateNote(ctx, in)
+		return srv.(DocsServer).UpdateNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_UpdateNote_FullMethodName,
+		FullMethod: Docs_UpdateNote_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).UpdateNote(ctx, req.(*Note))
+		return srv.(DocsServer).UpdateNote(ctx, req.(*Note))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_AddCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_AddCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Credential)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).AddCredential(ctx, in)
+		return srv.(DocsServer).AddCredential(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_AddCredential_FullMethodName,
+		FullMethod: Docs_AddCredential_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).AddCredential(ctx, req.(*Credential))
+		return srv.(DocsServer).AddCredential(ctx, req.(*Credential))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_DeleteCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_DeleteCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Credential)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).DeleteCredential(ctx, in)
+		return srv.(DocsServer).DeleteCredential(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_DeleteCredential_FullMethodName,
+		FullMethod: Docs_DeleteCredential_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).DeleteCredential(ctx, req.(*Credential))
+		return srv.(DocsServer).DeleteCredential(ctx, req.(*Credential))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_UpdateCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_UpdateCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Credential)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).UpdateCredential(ctx, in)
+		return srv.(DocsServer).UpdateCredential(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_UpdateCredential_FullMethodName,
+		FullMethod: Docs_UpdateCredential_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).UpdateCredential(ctx, req.(*Credential))
+		return srv.(DocsServer).UpdateCredential(ctx, req.(*Credential))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_AddCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_AddCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Card)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).AddCard(ctx, in)
+		return srv.(DocsServer).AddCard(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_AddCard_FullMethodName,
+		FullMethod: Docs_AddCard_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).AddCard(ctx, req.(*Card))
+		return srv.(DocsServer).AddCard(ctx, req.(*Card))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_DeleteCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_DeleteCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Card)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).DeleteCard(ctx, in)
+		return srv.(DocsServer).DeleteCard(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_DeleteCard_FullMethodName,
+		FullMethod: Docs_DeleteCard_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).DeleteCard(ctx, req.(*Card))
+		return srv.(DocsServer).DeleteCard(ctx, req.(*Card))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wallet_UpdateCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Docs_UpdateCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Card)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServer).UpdateCard(ctx, in)
+		return srv.(DocsServer).UpdateCard(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wallet_UpdateCard_FullMethodName,
+		FullMethod: Docs_UpdateCard_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServer).UpdateCard(ctx, req.(*Card))
+		return srv.(DocsServer).UpdateCard(ctx, req.(*Card))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Wallet_ServiceDesc is the grpc.ServiceDesc for Wallet service.
+// Docs_ServiceDesc is the grpc.ServiceDesc for Docs service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Wallet_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpcapi.Wallet",
-	HandlerType: (*WalletServer)(nil),
+var Docs_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "grpcapi.Docs",
+	HandlerType: (*DocsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "AddNote",
-			Handler:    _Wallet_AddNote_Handler,
+			Handler:    _Docs_AddNote_Handler,
 		},
 		{
 			MethodName: "DeleteNote",
-			Handler:    _Wallet_DeleteNote_Handler,
+			Handler:    _Docs_DeleteNote_Handler,
 		},
 		{
 			MethodName: "UpdateNote",
-			Handler:    _Wallet_UpdateNote_Handler,
+			Handler:    _Docs_UpdateNote_Handler,
 		},
 		{
 			MethodName: "AddCredential",
-			Handler:    _Wallet_AddCredential_Handler,
+			Handler:    _Docs_AddCredential_Handler,
 		},
 		{
 			MethodName: "DeleteCredential",
-			Handler:    _Wallet_DeleteCredential_Handler,
+			Handler:    _Docs_DeleteCredential_Handler,
 		},
 		{
 			MethodName: "UpdateCredential",
-			Handler:    _Wallet_UpdateCredential_Handler,
+			Handler:    _Docs_UpdateCredential_Handler,
 		},
 		{
 			MethodName: "AddCard",
-			Handler:    _Wallet_AddCard_Handler,
+			Handler:    _Docs_AddCard_Handler,
 		},
 		{
 			MethodName: "DeleteCard",
-			Handler:    _Wallet_DeleteCard_Handler,
+			Handler:    _Docs_DeleteCard_Handler,
 		},
 		{
 			MethodName: "UpdateCard",
-			Handler:    _Wallet_UpdateCard_Handler,
+			Handler:    _Docs_UpdateCard_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "GetUpdateStream",
-			Handler:       _Wallet_GetUpdateStream_Handler,
+			Handler:       _Docs_GetUpdateStream_Handler,
 			ServerStreams: true,
 		},
 	},

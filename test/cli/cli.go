@@ -18,7 +18,7 @@ var (
 	user, password, jwt     string
 	conn                    *grpc.ClientConn
 	auth                    proto.AuthClient
-	wallet                  proto.WalletClient
+	docs                    proto.DocsClient
 	name, text, id, expires string
 	serial                  int64
 	meta1                   proto.Meta = proto.Meta{
@@ -53,7 +53,7 @@ func main() {
 	}
 	defer func() { _ = conn.Close() }()
 	auth = proto.NewAuthClient(conn)
-	wallet = proto.NewWalletClient(conn)
+	docs = proto.NewDocsClient(conn)
 
 	switch command {
 	case "login":
@@ -82,7 +82,7 @@ func getUpdateStream() {
 	fmt.Println("UPDATE STREAM")
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "bearer", jwt)
 	req := &proto.UpdateRequest{Serial: int64(serial)}
-	stream, err := wallet.GetUpdateStream(ctx, req)
+	stream, err := docs.GetUpdateStream(ctx, req)
 	if err != nil {
 		fmt.Println("error ", err)
 		return
@@ -155,7 +155,7 @@ func addNote() {
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Text:     text,
 	}
-	_, err := wallet.AddNote(ctx, req)
+	_, err := docs.AddNote(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func delNote() {
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Text:     text,
 	}
-	_, err := wallet.DeleteNote(ctx, req)
+	_, err := docs.DeleteNote(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -187,7 +187,7 @@ func updNote() {
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Text:     text,
 	}
-	_, err := wallet.UpdateNote(ctx, req)
+	_, err := docs.UpdateNote(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -201,7 +201,7 @@ func addCard() {
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Expires:  expires,
 	}
-	_, err := wallet.AddCard(ctx, req)
+	_, err := docs.AddCard(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -215,7 +215,7 @@ func addCred() {
 		Metadata: []*proto.Meta{&meta1, &meta2},
 		Password: password,
 	}
-	_, err := wallet.AddCredential(ctx, req)
+	_, err := docs.AddCredential(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -28,7 +28,7 @@ type Docs interface {
 }
 
 type DocsHandlers struct {
-	pb.UnimplementedWalletServer
+	pb.UnimplementedDocsServer
 	docs Docs
 }
 
@@ -36,7 +36,7 @@ func NewDocsHandlers(db Docs) *DocsHandlers {
 	return &DocsHandlers{docs: db}
 }
 
-func (w DocsHandlers) GetUpdateStream(request *pb.UpdateRequest, stream pb.Wallet_GetUpdateStreamServer) error {
+func (w DocsHandlers) GetUpdateStream(request *pb.UpdateRequest, stream pb.Docs_GetUpdateStreamServer) error {
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)

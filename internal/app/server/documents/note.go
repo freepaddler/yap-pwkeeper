@@ -1,4 +1,4 @@
-package wallet
+package documents
 
 import (
 	"context"

@@ -71,7 +71,7 @@ service Auth {
   rpc Refresh(Token) returns (Token);
 }
 
-service Wallet {
+service Docs {
   rpc GetUpdateStream(UpdateRequest) returns (stream UpdateResponse);
 
   rpc AddNote(Note) returns (Empty);

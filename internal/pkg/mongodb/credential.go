@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"yap-pwkeeper/internal/app/server/wallet"
+	"yap-pwkeeper/internal/app/server/documents"
 	"yap-pwkeeper/internal/pkg/models"
 )
 
@@ -35,7 +35,7 @@ func (db *Mongodb) GetCredential(ctx context.Context, docId string, userId strin
 	}
 	if err := coll.FindOne(ctx, filter).Decode(&credential); err != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
-			err = wallet.ErrNotFound
+			err = documents.ErrNotFound
 		}
 		return credential, err
 	}
@@ -62,7 +62,7 @@ func (db *Mongodb) ModifyCredential(ctx context.Context, credential models.Crede
 	var result interface{}
 	err = coll.FindOneAndReplace(ctx, filter, newCredential).Decode(&result)
 	if errors.Is(mongo.ErrNoDocuments, err) {
-		err = wallet.ErrNotFound
+		err = documents.ErrNotFound
 	}
 	return err
 }

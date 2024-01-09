@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"yap-pwkeeper/internal/app/server/wallet"
+	"yap-pwkeeper/internal/app/server/documents"
 	"yap-pwkeeper/internal/pkg/grpc/interceptors"
 	pb "yap-pwkeeper/internal/pkg/grpc/proto"
 	"yap-pwkeeper/internal/pkg/logger"
@@ -53,7 +53,7 @@ func New(opts ...func(gs *GRCPServer)) *GRCPServer {
 		grpc.ChainStreamInterceptor(gs.streamInterceptors...),
 	)
 	pb.RegisterAuthServer(gs.Server, gs.auth)
-	pb.RegisterWalletServer(gs.Server, gs.wallet)
+	pb.RegisterDocsServer(gs.Server, gs.wallet)
 	return gs
 }
 
@@ -92,14 +92,14 @@ func WithStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) func(s
 // respErr returns grpc error response
 func respErr(ctx context.Context, err error) error {
 	switch {
-	case errors.Is(wallet.ErrBadRequest, err):
-		return status.Error(codes.InvalidArgument, wallet.ErrBadRequest.Error())
-	case errors.Is(wallet.ErrChanged, err):
-		return status.Error(codes.FailedPrecondition, wallet.ErrChanged.Error())
-	case errors.Is(wallet.ErrDeleted, err):
-		return status.Error(codes.FailedPrecondition, wallet.ErrDeleted.Error())
-	case errors.Is(wallet.ErrNotFound, err):
-		return status.Error(codes.NotFound, wallet.ErrNotFound.Error())
+	case errors.Is(documents.ErrBadRequest, err):
+		return status.Error(codes.InvalidArgument, documents.ErrBadRequest.Error())
+	case errors.Is(documents.ErrChanged, err):
+		return status.Error(codes.FailedPrecondition, documents.ErrChanged.Error())
+	case errors.Is(documents.ErrDeleted, err):
+		return status.Error(codes.FailedPrecondition, documents.ErrDeleted.Error())
+	case errors.Is(documents.ErrNotFound, err):
+		return status.Error(codes.NotFound, documents.ErrNotFound.Error())
 	default:
 		logger.Log().WithErr(err).WithCtxRequestId(ctx).Error("server error")
 		return status.Error(codes.Internal, "server error")

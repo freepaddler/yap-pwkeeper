@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -38,13 +42,162 @@ type Note struct {
 	Entity `bson:"inline"`
 }
 
+type File struct {
+	Id       string  `bson:"_id,omitempty"`
+	Name     string  `bson:"name"`
+	FileName string  `bson:"filename"`
+	FileSize int64   `bson:"filesize"`
+	Sha256   string  `bson:"sha256"`
+	Data     *[]byte `bson:"data"`
+}
+
+var (
+	orig       = "/tmp/ui1.dat"
+	clientfile = "/tmp/ui1.dat"
+	serverfile = "/tmp/ui2.dat"
+)
+
+func readchunk() {
+	//st, err := os.Stat(orig)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	f1, err := os.Open(orig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f1.Close()
+	h := sha256.New()
+	_, err = io.Copy(h, f1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%x", h.Sum(nil))
+
+	return
+
+	//defer f1.Close()
+	//fc, err := os.Create(clientfile)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer fc.Close()
+	//fs, err := os.Create(serverfile)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer fs.Close()
+	//
+	//b := make([]byte, 0, st.Size())
+	//buf := bytes.NewBuffer(b)
+	//hash := sha256.New()
+	//mw := io.MultiWriter(fc, hash, buf)
+	//
+	//for {
+	//	tmp := make([]byte, 1<<8)
+	//	n, err := f1.Read(tmp)
+	//	log.Printf("read %d", n)
+	//	if err != nil {
+	//		if errors.Is(io.EOF, err) {
+	//			log.Println("end of file")
+	//			break
+	//		}
+	//		log.Fatal(err)
+	//	}
+	//	_, err = mw.Write(tmp)
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//}
+	//_, err = fs.Write(buf.Bytes())
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Println(hex.EncodeToString(hash.Sum(nil)))
+}
+
 func main() {
+	f1, err := os.Open(orig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f1.Close()
+	h := sha256.New()
+	_, err = io.Copy(h, f1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%x", h.Sum(nil))
+	return
+
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		panic(err)
 	}
 	defer client.Disconnect(context.Background())
-	coll := client.Database("test").Collection("user")
+	coll := client.Database("test").Collection("files")
+
+	//fname := "/tmp/ui.log"
+	//f2name := "/tmp/ui2.log"
+	//
+	//stat, err := os.Stat(fname)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//b := make([]byte, 0, stat.Size())
+	//buf := bytes.NewBuffer(b)
+	//hash := sha256.New()
+	//mw := io.MultiWriter(buf, hash)
+	//
+	//f, err := os.Open(fname)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer f.Close()
+	////_, err := io.
+	//
+	//buf := bytes
+	//b, err := io.ReadAll(f)
+	//st, err := os.Stat(fname)
+	//h := sha256.New()
+	//if _, err := io.Copy(h, f); err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Println("sha is " + hex.EncodeToString(h.Sum(nil)) + " " + st.Name())
+	//
+	//fst := File{
+	//	Name:     "file",
+	//	FileName: st.Name(),
+	//	FileSize: st.Size(),
+	//	Sha256:   hex.EncodeToString(h.Sum(nil)),
+	//	Data:     &b,
+	//}
+	//
+	//res, err := coll.InsertOne(context.Background(), &fst)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//log.Println("document_id " + res.InsertedID.(primitive.ObjectID).Hex())
+	//
+	//f2 := File{}
+	//file2, err := os.Create(f2name)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer file2.Close()
+	//
+	//err = coll.FindOne(context.Background(), bson.D{{"_id", res.InsertedID}}).Decode(&f2)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//file2.Write(*f2.Data)
+	//
+	//log.Println("Done")
+	//
+	//return
 
 	userNew := User{
 		Login:    "login",

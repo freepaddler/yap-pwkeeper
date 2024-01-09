@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"yap-pwkeeper/internal/app/server/wallet"
+	"yap-pwkeeper/internal/app/server/documents"
 	"yap-pwkeeper/internal/pkg/models"
 )
 
@@ -35,7 +35,7 @@ func (db *Mongodb) GetNote(ctx context.Context, docId string, userId string) (mo
 	}
 	if err := coll.FindOne(ctx, filter).Decode(&note); err != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
-			err = wallet.ErrNotFound
+			err = documents.ErrNotFound
 		}
 		return note, err
 	}
@@ -62,7 +62,7 @@ func (db *Mongodb) ModifyNote(ctx context.Context, note models.Note) error {
 	var result interface{}
 	err = coll.FindOneAndReplace(ctx, filter, newNote).Decode(&result)
 	if errors.Is(mongo.ErrNoDocuments, err) {
-		err = wallet.ErrNotFound
+		err = documents.ErrNotFound
 	}
 	return err
 }

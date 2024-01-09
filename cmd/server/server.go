@@ -11,9 +11,9 @@ import (
 	"yap-pwkeeper/internal/app/server"
 	"yap-pwkeeper/internal/app/server/aaa"
 	"yap-pwkeeper/internal/app/server/config"
+	"yap-pwkeeper/internal/app/server/documents"
 	"yap-pwkeeper/internal/app/server/grpcapi"
 	"yap-pwkeeper/internal/app/server/serial"
-	"yap-pwkeeper/internal/app/server/wallet"
 	"yap-pwkeeper/internal/pkg/grpc/interceptors"
 	"yap-pwkeeper/internal/pkg/jwtToken"
 	"yap-pwkeeper/internal/pkg/logger"
@@ -92,8 +92,8 @@ func main() {
 	// auth controller
 	auth := aaa.New(db)
 
-	// wallet controller
-	docs := wallet.New(db)
+	// documents controller
+	docs := documents.New(db)
 
 	// setup grpc
 	gs := grpcapi.New(

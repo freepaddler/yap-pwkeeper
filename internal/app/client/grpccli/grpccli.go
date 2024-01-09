@@ -20,14 +20,14 @@ import (
 )
 
 type Client struct {
-	address                   string             // server address
-	conn                      *grpc.ClientConn   // server connection
-	auth                      proto.AuthClient   // server auth service
-	docs                      proto.WalletClient // server documents service
-	authTimeout               time.Duration      // timeout for auth service
-	dataTimeout               time.Duration      // timeout for documents service
-	tokenTimeUntilExpire      time.Duration      // time left until token expired
-	tokenRefreshRetryInterval time.Duration      // token refresh retry
+	address                   string           // server address
+	conn                      *grpc.ClientConn // server connection
+	auth                      proto.AuthClient // server auth service
+	docs                      proto.DocsClient // server documents service
+	authTimeout               time.Duration    // timeout for auth service
+	dataTimeout               time.Duration    // timeout for documents service
+	tokenTimeUntilExpire      time.Duration    // time left until token expired
+	tokenRefreshRetryInterval time.Duration    // token refresh retry
 	token                     string
 	ch                        chan struct{} // token refresher control chan
 	mu                        sync.RWMutex  // token and chan mutex
@@ -52,7 +52,7 @@ func New(address string, options ...func(c *Client)) (*Client, error) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	cli.auth = proto.NewAuthClient(cli.conn)
-	cli.docs = proto.NewWalletClient(cli.conn)
+	cli.docs = proto.NewDocsClient(cli.conn)
 	return cli, err
 }
 
