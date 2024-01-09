@@ -79,6 +79,9 @@ func (c *Controller) GetUpdatesStream(ctx context.Context, userId string, minSer
 	g.Go(func() error {
 		return c.store.GetCredentialsStream(gCtx, userId, minSerial, maxSerial, chData)
 	})
+	g.Go(func() error {
+		return c.store.GetFilesInfoStream(gCtx, userId, minSerial, maxSerial, chData)
+	})
 
 	err = g.Wait()
 	if err != nil {

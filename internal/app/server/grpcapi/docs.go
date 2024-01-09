@@ -63,6 +63,8 @@ func (w DocsHandlers) GetUpdateStream(request *pb.UpdateRequest, stream pb.Docs_
 			response = &pb.UpdateResponse{Update: &pb.UpdateResponse_Card{Card: pb.FromCard(data.(models.Card))}}
 		case models.Credential:
 			response = &pb.UpdateResponse{Update: &pb.UpdateResponse_Credential{Credential: pb.FromCredential(data.(models.Credential))}}
+		case models.File:
+			response = &pb.UpdateResponse{Update: &pb.UpdateResponse_File{File: pb.FromFile(data.(models.File))}}
 		default:
 			log.Warnf("invalid data type in updates stream")
 			continue
