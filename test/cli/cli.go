@@ -195,6 +195,9 @@ func getUpdateStream() {
 		case *proto.UpdateResponse_Card:
 			card := update.Card
 			fmt.Println("card: ", card)
+		case *proto.UpdateResponse_File:
+			file := update.File
+			fmt.Println("file: ", file)
 		}
 	}
 }

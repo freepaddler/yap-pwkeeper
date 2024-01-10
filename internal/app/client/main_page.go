@@ -25,6 +25,7 @@ func (a *App) mainPage() {
 	a.categories.AddItem("", "", 0, nil)
 	a.categories.AddItem("", "", 0, nil)
 	a.categories.AddItem("", "", 0, nil)
+	a.categories.AddItem("", "", 0, nil)
 
 	a.categories.SetSelectedFunc(func(i int, s string, s2 string, r rune) {
 		if a.itemsList.GetItemCount() > 0 {
@@ -41,6 +42,8 @@ func (a *App) mainPage() {
 			a.credentialsList()
 		case 2:
 			a.notesList()
+		case 3:
+			a.filesList()
 		}
 	})
 
@@ -52,6 +55,8 @@ func (a *App) mainPage() {
 			a.credentialsList()
 		case 2:
 			a.notesList()
+		case 3:
+			a.filesList()
 		}
 	})
 
@@ -80,6 +85,9 @@ func (a *App) mainPage() {
 			a.ui.SetFocus(a.form)
 		case 'n':
 			a.notesForm(&models.Note{}, formAdd)
+			a.ui.SetFocus(a.form)
+		case 'f':
+			a.filesForm(&models.File{}, formAdd)
 			a.ui.SetFocus(a.form)
 		}
 
@@ -115,6 +123,9 @@ func (a *App) mainPage() {
 		case 'n':
 			a.notesForm(&models.Note{}, formAdd)
 			a.ui.SetFocus(a.form)
+		case 'f':
+			a.filesForm(&models.File{}, formAdd)
+			a.ui.SetFocus(a.form)
 		}
 		return event
 	})
@@ -149,7 +160,7 @@ func (a *App) notesList() {
 	})
 }
 
-// notesList display list of Cards
+// cardsList display list of Cards
 func (a *App) cardsList() {
 	a.itemsList.Clear().SetTitle("Cards")
 	for _, v := range a.store.GetCardsList() {
@@ -171,7 +182,7 @@ func (a *App) cardsList() {
 	})
 }
 
-// notesList display list of Credentials
+// credentialsList display list of Credentials
 func (a *App) credentialsList() {
 	a.itemsList.Clear().SetTitle("Credentials")
 	for _, v := range a.store.GetCredentialsList() {
@@ -190,6 +201,28 @@ func (a *App) credentialsList() {
 	a.itemsList.SetFocusFunc(func() {
 		_, id := a.itemsList.GetItemText(a.itemsList.GetCurrentItem())
 		a.credentialsForm(a.store.GetCredential(id), formModify)
+	})
+}
+
+// filesList display list of Credentials
+func (a *App) filesList() {
+	a.itemsList.Clear().SetTitle("Files")
+	for _, v := range a.store.GetFilesList() {
+		v := *v
+		a.itemsList.AddItem(v.Name, v.Id, 0, func() {
+			a.ui.SetFocus(a.form)
+		})
+		a.itemsList.SetChangedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
+			if a.itemsList.HasFocus() {
+				a.filesForm(a.store.GetFileInfo(secondaryText), formModify)
+			} else {
+				a.clearForm()
+			}
+		})
+	}
+	a.itemsList.SetFocusFunc(func() {
+		_, id := a.itemsList.GetItemText(a.itemsList.GetCurrentItem())
+		a.filesForm(a.store.GetFileInfo(id), formModify)
 	})
 }
 
@@ -226,6 +259,12 @@ func (a *App) saveMeta(meta *models.Meta, metadata *[]models.Meta) {
 
 // drawMetadata displays metadata content and metadata delete dropdown
 func (a *App) drawMetadata(metadata *[]models.Meta) {
+	if idx := a.form.GetFormItemIndex("Add meta key"); idx > -1 {
+		a.form.RemoveFormItem(idx)
+	}
+	if idx := a.form.GetFormItemIndex("Add meta value"); idx > -1 {
+		a.form.RemoveFormItem(idx)
+	}
 	if idx := a.form.GetFormItemIndex("Metadata"); idx > -1 {
 		a.form.RemoveFormItem(idx)
 	}
@@ -248,8 +287,8 @@ func (a *App) drawMetadata(metadata *[]models.Meta) {
 	}
 	if size == 0 {
 		a.form.AddTextView("Metadata", text, 30, 1, true, true)
-		a.form.GetFormItemIndex("Metadata")
-		a.form.GetFormItem(a.form.GetFormItemIndex("Metadata")).SetDisabled(true)
+		//a.form.GetFormItemIndex("Metadata")
+		//a.form.GetFormItem(a.form.GetFormItemIndex("Metadata")).SetDisabled(true)
 	} else {
 		a.form.AddTextView("Metadata", text, 30, size, true, true)
 		a.form.AddDropDown("Delete Meta", options, -1, func(option string, optionIndex int) {

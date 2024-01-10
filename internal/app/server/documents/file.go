@@ -53,11 +53,12 @@ func (c *Controller) DeleteFile(ctx context.Context, file models.File) error {
 	file.Serial = s
 
 	deleted := models.File{
-		Id:     file.Id,
-		UserId: file.UserId,
-		Name:   file.Name,
-		Serial: s,
-		State:  models.StateDeleted,
+		Id:       file.Id,
+		UserId:   file.UserId,
+		Name:     file.Name,
+		Serial:   s,
+		Filename: file.Filename,
+		State:    models.StateDeleted,
 	}
 	err = c.store.ModifyFile(ctx, deleted)
 	if err != nil {
@@ -107,6 +108,7 @@ func (c *Controller) validateFileUpdate(ctx context.Context, file models.File) (
 	if err != nil {
 		return hash, err
 	}
+	hash = stored.Sha265
 	if stored.State == models.StateDeleted {
 		return hash, ErrDeleted
 	}

@@ -13,22 +13,33 @@ const (
 type DataStore interface {
 	Register(login, password string) error
 	Login(login, password string) error
+
 	Update() error
+
 	GetCardsList() []*models.Card
+	GetCard(id string) *models.Card
+	AddCard(note models.Card) error
+	UpdateCard(note models.Card) error
+	DeleteCard(note models.Card) error
+
 	GetCredentialsList() []*models.Credential
+	GetCredential(id string) *models.Credential
+	AddCredential(note models.Credential) error
+	UpdateCredential(note models.Credential) error
+	DeleteCredential(note models.Credential) error
+
 	GetNotesList() []*models.Note
 	GetNote(id string) *models.Note
 	AddNote(note models.Note) error
 	UpdateNote(note models.Note) error
 	DeleteNote(note models.Note) error
-	GetCard(id string) *models.Card
-	AddCard(note models.Card) error
-	UpdateCard(note models.Card) error
-	DeleteCard(note models.Card) error
-	GetCredential(id string) *models.Credential
-	AddCredential(note models.Credential) error
-	UpdateCredential(note models.Credential) error
-	DeleteCredential(note models.Credential) error
+
+	GetFilesList() []*models.File
+	GetFileInfo(id string) *models.File
+	AddFile(d models.File, filename string) error
+	UpdateFileInfo(d models.File) error
+	UpdateFile(d models.File, filename string) error
+	DeleteFile(note models.File) error
 }
 
 type App struct {

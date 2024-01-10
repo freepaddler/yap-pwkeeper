@@ -1154,7 +1154,7 @@ var file_grpc_proto_depIdxs = []int32{
 	10, // 23: grpcapi.Docs.AddFile:input_type -> grpcapi.FileStream
 	8,  // 24: grpcapi.Docs.DeleteFile:input_type -> grpcapi.File
 	10, // 25: grpcapi.Docs.UpdateFile:input_type -> grpcapi.FileStream
-	9,  // 26: grpcapi.Docs.GetFile:input_type -> grpcapi.DocumentRequest
+	9,  // 26: grpcapi.Docs.GetFileInfo:input_type -> grpcapi.DocumentRequest
 	0,  // 27: grpcapi.Auth.Register:output_type -> grpcapi.Empty
 	2,  // 28: grpcapi.Auth.Login:output_type -> grpcapi.Token
 	2,  // 29: grpcapi.Auth.Refresh:output_type -> grpcapi.Token
@@ -1171,7 +1171,7 @@ var file_grpc_proto_depIdxs = []int32{
 	0,  // 40: grpcapi.Docs.AddFile:output_type -> grpcapi.Empty
 	0,  // 41: grpcapi.Docs.DeleteFile:output_type -> grpcapi.Empty
 	0,  // 42: grpcapi.Docs.UpdateFile:output_type -> grpcapi.Empty
-	10, // 43: grpcapi.Docs.GetFile:output_type -> grpcapi.FileStream
+	10, // 43: grpcapi.Docs.GetFileInfo:output_type -> grpcapi.FileStream
 	27, // [27:44] is the sub-list for method output_type
 	10, // [10:27] is the sub-list for method input_type
 	10, // [10:10] is the sub-list for extension type_name

@@ -28,7 +28,7 @@ func (w DocsHandlers) UpdateFile(stream proto.Docs_UpdateFileServer) error {
 	defer cancel()
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("update file stream request")
-	return w.withFileFromStream(stream, w.docs.AddFile)
+	return w.withFileFromStream(stream, w.docs.UpdateFile)
 }
 
 // withFileFromStream gets file from stream and executes passed function

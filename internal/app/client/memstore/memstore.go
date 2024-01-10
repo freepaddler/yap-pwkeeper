@@ -9,6 +9,7 @@ package memstore
 import (
 	"errors"
 	"fmt"
+	"io"
 	"sync"
 
 	"golang.org/x/sync/singleflight"
@@ -21,16 +22,25 @@ import (
 type DocServer interface {
 	Register(login, password string) error
 	Login(login, password string) error
+
 	GetUpdateStream(serial int64, chData chan interface{}, chErr chan error)
+
 	AddNote(note models.Note) error
 	UpdateNote(d models.Note) error
 	DeleteNote(d models.Note) error
+
 	AddCard(note models.Card) error
 	UpdateCard(d models.Card) error
 	DeleteCard(d models.Card) error
+
 	AddCredential(note models.Credential) error
 	UpdateCredential(d models.Credential) error
 	DeleteCredential(d models.Credential) error
+
+	AddFile(d models.File, r io.Reader) error
+	UpdateFileInfo(d models.File) error
+	UpdateFile(d models.File, r io.Reader) error
+	DeleteFile(d models.File) error
 }
 
 var (
@@ -42,6 +52,7 @@ type Store struct {
 	notes       map[string]*models.Note
 	cards       map[string]*models.Card
 	credentials map[string]*models.Credential
+	files       map[string]*models.File
 	serial      int64
 	mu          sync.RWMutex
 	server      DocServer
@@ -65,6 +76,7 @@ func (s *Store) bootstrap() {
 	s.notes = make(map[string]*models.Note)
 	s.cards = make(map[string]*models.Card)
 	s.credentials = make(map[string]*models.Credential)
+	s.files = make(map[string]*models.File)
 	s.serial = -1
 }
 

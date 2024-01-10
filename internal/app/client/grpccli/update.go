@@ -43,10 +43,9 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 			note, err := update.Note.ToNote()
 			if err != nil {
 				log.Printf("grpc update: invalid note: %s", err)
-				log.Println(note)
 				continue
 			}
-			log.Printf("note %v", note)
+			//log.Printf("note %v", note)
 			chData <- note
 		case *proto.UpdateResponse_Credential:
 			cred, err := update.Credential.ToCredential()
@@ -54,7 +53,7 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 				log.Printf("grpc update: invalid credential: %s", err)
 				continue
 			}
-			log.Printf("credential %v", cred)
+			//log.Printf("credential %v", cred)
 			chData <- cred
 		case *proto.UpdateResponse_Card:
 			card, err := update.Card.ToCard()
@@ -62,8 +61,16 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 				log.Printf("grpc update: invalid card: %s", err)
 				continue
 			}
-			log.Printf("card %v", card)
+			//log.Printf("card %v", card)
 			chData <- card
+		case *proto.UpdateResponse_File:
+			file, err := update.File.ToFile()
+			if err != nil {
+				log.Printf("grpc update: invalid file: %s", err)
+				continue
+			}
+			log.Printf("file %v", file)
+			chData <- file
 		}
 		counter++
 	}

@@ -53,6 +53,14 @@ func receiver2(ch chan interface{}) {
 func Test_just(t *testing.T) {
 
 	file := "/tmp/test/small.dat"
+	st, err := os.Stat(file)
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(st.Mode())
+
+	return
 
 	f, err := os.Open(file)
 	if err != nil {

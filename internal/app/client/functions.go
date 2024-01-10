@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"yap-pwkeeper/internal/app/client/memstore"
 )
@@ -39,6 +40,7 @@ func (a *App) synchronize() {
 		a.categories.SetItemText(0, fmt.Sprintf("Cards (%d)", len(a.store.GetCardsList())), "[yellow](`C` to add new)")
 		a.categories.SetItemText(1, fmt.Sprintf("Logins (%d)", len(a.store.GetCredentialsList())), "[yellow](`L` to add new)")
 		a.categories.SetItemText(2, fmt.Sprintf("Notes (%d)", len(a.store.GetNotesList())), "[yellow](`N` to add new)")
+		a.categories.SetItemText(3, fmt.Sprintf("Files (%d)", len(a.store.GetFilesList())), "[yellow](`F` to add new)")
 	}
 }
 
@@ -53,4 +55,24 @@ func (a *App) modifyRequest(fn func() error, okMsg, failMsg string) {
 	} else {
 		a.modalOk(okMsg)
 	}
+}
+
+// checkFile checks file before trying to upload
+func checkFile(filename string) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	_ = f.Close()
+	st, err := os.Stat(filename)
+	if err != nil {
+		return fmt.Errorf("failed to access file: %w", err)
+	}
+	if st.IsDir() {
+		return errors.New("it is directory, not a file")
+	}
+	if st.Size() > 14<<20 {
+		return errors.New("file is too big, maximum allowed size is 14 MB")
+	}
+	return nil
 }

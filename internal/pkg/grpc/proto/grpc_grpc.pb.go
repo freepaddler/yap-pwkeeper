@@ -196,7 +196,7 @@ const (
 	Docs_AddFile_FullMethodName          = "/grpcapi.Docs/AddFile"
 	Docs_DeleteFile_FullMethodName       = "/grpcapi.Docs/DeleteFile"
 	Docs_UpdateFile_FullMethodName       = "/grpcapi.Docs/UpdateFile"
-	Docs_GetFile_FullMethodName          = "/grpcapi.Docs/GetFile"
+	Docs_GetFile_FullMethodName          = "/grpcapi.Docs/GetFileInfo"
 )
 
 // DocsClient is the client API for Docs service.
@@ -514,7 +514,7 @@ func (UnimplementedDocsServer) UpdateFile(Docs_UpdateFileServer) error {
 	return status.Errorf(codes.Unimplemented, "method UpdateFile not implemented")
 }
 func (UnimplementedDocsServer) GetFile(*DocumentRequest, Docs_GetFileServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetFile not implemented")
+	return status.Errorf(codes.Unimplemented, "method GetFileInfo not implemented")
 }
 func (UnimplementedDocsServer) mustEmbedUnimplementedDocsServer() {}
 
@@ -868,7 +868,7 @@ var Docs_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "GetFile",
+			StreamName:    "GetFileInfo",
 			Handler:       _Docs_GetFile_Handler,
 			ServerStreams: true,
 		},

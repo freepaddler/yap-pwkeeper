@@ -128,6 +128,7 @@ func (x *File) ToFile() (models.File, error) {
 	file := models.File{
 		Id:       x.Id,
 		Serial:   x.Serial,
+		State:    x.State,
 		Name:     x.Name,
 		Filename: x.Filename,
 		Size:     x.Size,

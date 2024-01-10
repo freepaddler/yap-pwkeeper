@@ -1,6 +1,8 @@
 package memstore
 
 import (
+	"log"
+
 	"yap-pwkeeper/internal/pkg/models"
 )
 
@@ -33,6 +35,7 @@ func (s *Store) update() error {
 	chData := make(chan interface{})
 	chErr := make(chan error, 1)
 	serial := s.getSerial()
+	log.Printf("Serial before update %d", serial)
 	go s.server.GetUpdateStream(serial, chData, chErr)
 	for {
 		data, ok := <-chData
@@ -43,15 +46,19 @@ func (s *Store) update() error {
 		case models.Note:
 			d := data.(models.Note)
 			s.placeNote(d)
-			incSerial(serial, d.Serial)
+			serial = incSerial(serial, d.Serial)
 		case models.Credential:
 			d := data.(models.Credential)
 			s.placeCredential(d)
-			incSerial(serial, d.Serial)
+			serial = incSerial(serial, d.Serial)
 		case models.Card:
 			d := data.(models.Card)
 			s.placeCard(d)
-			incSerial(serial, d.Serial)
+			serial = incSerial(serial, d.Serial)
+		case models.File:
+			d := data.(models.File)
+			s.placeFile(d)
+			serial = incSerial(serial, d.Serial)
 		}
 	}
 	err := <-chErr
@@ -60,6 +67,7 @@ func (s *Store) update() error {
 		s.serial = serial
 		s.mu.Unlock()
 	}
+	log.Printf("Serial after update %d", serial)
 	return err
 }
 
@@ -93,5 +101,16 @@ func (s *Store) placeCredential(d models.Credential) {
 		delete(s.credentials, d.Id)
 	} else {
 		s.credentials[d.Id] = &d
+	}
+}
+
+// placeFile updates or adds FileInfo to local storage
+func (s *Store) placeFile(d models.File) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if d.State == models.StateDeleted {
+		delete(s.files, d.Id)
+	} else {
+		s.files[d.Id] = &d
 	}
 }
