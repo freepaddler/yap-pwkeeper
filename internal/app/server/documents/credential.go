@@ -8,6 +8,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddCredential stores new Credential in DataStorage
 func (c *Controller) AddCredential(ctx context.Context, credential models.Credential) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add credential request")
@@ -29,6 +30,8 @@ func (c *Controller) AddCredential(ctx context.Context, credential models.Creden
 	return err
 }
 
+// DeleteCredential removes  Credential from DataStorage. Actually only document payload is deleted,
+// but document id stays in DataStorage with Deleted flag.
 func (c *Controller) DeleteCredential(ctx context.Context, credential models.Credential) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", credential.Id)
 	log.Debug("delete credential request")
@@ -62,6 +65,7 @@ func (c *Controller) DeleteCredential(ctx context.Context, credential models.Cre
 	return err
 }
 
+// UpdateCredential modifies the whole Credential, leaving id intact.
 func (c *Controller) UpdateCredential(ctx context.Context, credential models.Credential) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", credential.Id)
 	log.Debug("update credential request")

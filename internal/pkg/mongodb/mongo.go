@@ -35,7 +35,6 @@ type Mongodb struct {
 	client *mongo.Client
 }
 
-// TODO add timeout to opts
 func New(ctx context.Context, uri string, opts ...func(db *Mongodb)) (*Mongodb, error) {
 	db := new(Mongodb)
 	var err error
@@ -49,6 +48,7 @@ func New(ctx context.Context, uri string, opts ...func(db *Mongodb)) (*Mongodb, 
 	return db, nil
 }
 
+// Close closes DB connection
 func (db *Mongodb) Close(ctx context.Context) error {
 	return db.client.Disconnect(ctx)
 }

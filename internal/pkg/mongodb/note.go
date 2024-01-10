@@ -12,6 +12,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddNote places new Note in the database
 func (db *Mongodb) AddNote(ctx context.Context, note models.Note) (string, error) {
 	coll := db.client.Database(dbName).Collection(collNotes)
 	res, err := coll.InsertOne(ctx, note)
@@ -22,6 +23,7 @@ func (db *Mongodb) AddNote(ctx context.Context, note models.Note) (string, error
 	return oid, err
 }
 
+// GetNote returns Note from database
 func (db *Mongodb) GetNote(ctx context.Context, docId string, userId string) (models.Note, error) {
 	coll := db.client.Database(dbName).Collection(collNotes)
 	note := models.Note{}
@@ -42,6 +44,8 @@ func (db *Mongodb) GetNote(ctx context.Context, docId string, userId string) (mo
 	return note, err
 }
 
+// ModifyNote updates record in database. Also called in delete action, because deleted
+// documents are only marked for with a flag, but not actually deleted.
 func (db *Mongodb) ModifyNote(ctx context.Context, note models.Note) error {
 	coll := db.client.Database(dbName).Collection(collNotes)
 	id, err := primitive.ObjectIDFromHex(note.Id)
@@ -67,6 +71,7 @@ func (db *Mongodb) ModifyNote(ctx context.Context, note models.Note) error {
 	return err
 }
 
+// GetNotesStream produces stream of Notes updates, happened between minSerial and maxSerial
 func (db *Mongodb) GetNotesStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collNotes)
 	filter := bson.D{

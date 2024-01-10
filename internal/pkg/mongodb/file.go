@@ -111,6 +111,7 @@ func (db *Mongodb) getFile(ctx context.Context, docId string, userId string, wit
 	return file, err
 }
 
+// GetFilesInfoStream produces stream of FileInfo updates, happened between minSerial and maxSerial
 func (db *Mongodb) GetFilesInfoStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collFiles)
 	filter := bson.D{

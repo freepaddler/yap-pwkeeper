@@ -12,6 +12,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddCard places new Card in the database
 func (db *Mongodb) AddCard(ctx context.Context, card models.Card) (string, error) {
 	coll := db.client.Database(dbName).Collection(collCards)
 	res, err := coll.InsertOne(ctx, card)
@@ -22,6 +23,7 @@ func (db *Mongodb) AddCard(ctx context.Context, card models.Card) (string, error
 	return oid, err
 }
 
+// GetCard returns Card from database
 func (db *Mongodb) GetCard(ctx context.Context, docId string, userId string) (models.Card, error) {
 	coll := db.client.Database(dbName).Collection(collCards)
 	card := models.Card{}
@@ -42,6 +44,8 @@ func (db *Mongodb) GetCard(ctx context.Context, docId string, userId string) (mo
 	return card, err
 }
 
+// ModifyCard updates record in database. Also called in delete action, because deleted
+// documents are only marked for with a flag, but not actually deleted.
 func (db *Mongodb) ModifyCard(ctx context.Context, card models.Card) error {
 	coll := db.client.Database(dbName).Collection(collCards)
 	id, err := primitive.ObjectIDFromHex(card.Id)
@@ -67,6 +71,7 @@ func (db *Mongodb) ModifyCard(ctx context.Context, card models.Card) error {
 	return err
 }
 
+// GetCardsStream produces stream of Cards updates, happened between minSerial and maxSerial
 func (db *Mongodb) GetCardsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collCards)
 	filter := bson.D{

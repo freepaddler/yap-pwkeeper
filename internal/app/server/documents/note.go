@@ -8,6 +8,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddNote stores new Note in DataStorage
 func (c *Controller) AddNote(ctx context.Context, note models.Note) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add note request")
@@ -29,6 +30,9 @@ func (c *Controller) AddNote(ctx context.Context, note models.Note) error {
 	return err
 }
 
+// DeleteNote removes  Note from DataStorage. Actually only document payload is deleted,
+// but document id stays in DataStorage with Deleted flag. This is designed to provide
+// proper updates to clients
 func (c *Controller) DeleteNote(ctx context.Context, note models.Note) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", note.Id)
 	log.Debug("delete note request")
@@ -62,6 +66,7 @@ func (c *Controller) DeleteNote(ctx context.Context, note models.Note) error {
 	return err
 }
 
+// UpdateNote modifies the whole Note, leaving id intact.
 func (c *Controller) UpdateNote(ctx context.Context, note models.Note) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", note.Id)
 	log.Debug("update note request")

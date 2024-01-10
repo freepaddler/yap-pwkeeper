@@ -1,3 +1,5 @@
+// Package documents implements documents processing business logic.
+// It contains all available methods to operate with documents.
 package documents
 
 import (
@@ -20,6 +22,7 @@ var (
 	ErrChanged    = errors.New("document server version mismatch")
 )
 
+// DocStorage defines interface to be implemented by storage backend
 type DocStorage interface {
 	AddNote(ctx context.Context, note models.Note) (string, error)
 	GetNote(ctx context.Context, docId string, userId string) (models.Note, error)
@@ -57,6 +60,8 @@ func New(store DocStorage) *Controller {
 	return c
 }
 
+// GetUpdatesStream combines updates of documents of any kind into a single stream.
+// This makes update process one-step.
 func (c *Controller) GetUpdatesStream(ctx context.Context, userId string, minSerial int64, chData chan interface{}, chErr chan error) {
 	defer func() {
 		close(chData)

@@ -11,6 +11,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// Docs are methods, implemented by Documents server
 type Docs interface {
 	AddNote(ctx context.Context, note models.Note) error
 	DeleteNote(ctx context.Context, note models.Note) error
@@ -41,6 +42,9 @@ func NewDocsHandlers(db Docs) *DocsHandlers {
 	return &DocsHandlers{docs: db}
 }
 
+// GetUpdateStream handles documents update request as single stream of documents.
+// Documents may have any order of types and update time.
+// Update stream does not contain Files binary data. Use GetFile method.
 func (w DocsHandlers) GetUpdateStream(request *pb.UpdateRequest, stream pb.Docs_GetUpdateStreamServer) error {
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()

@@ -8,12 +8,14 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// GetFile returns file from the DataStorage, including binary data.
 func (c *Controller) GetFile(ctx context.Context, docId string, userId string) (models.File, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("get file request")
 	return c.store.GetFile(ctx, docId, userId)
 }
 
+// AddFile stores new File in DataStorage
 func (c *Controller) AddFile(ctx context.Context, file models.File) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add file request")
@@ -35,6 +37,8 @@ func (c *Controller) AddFile(ctx context.Context, file models.File) error {
 	return err
 }
 
+// DeleteFile removes  File from DataStorage. Actually only document payload is deleted,
+// but document id stays in DataStorage with Deleted flag
 func (c *Controller) DeleteFile(ctx context.Context, file models.File) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", file.Id)
 	log.Debug("delete file request")
@@ -69,6 +73,7 @@ func (c *Controller) DeleteFile(ctx context.Context, file models.File) error {
 	return err
 }
 
+// UpdateFile modifies the whole File, leaving id intact.
 func (c *Controller) UpdateFile(ctx context.Context, file models.File) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", file.Id)
 	log.Debug("update file request")

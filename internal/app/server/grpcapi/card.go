@@ -10,6 +10,7 @@ import (
 	"yap-pwkeeper/internal/pkg/logger"
 )
 
+// AddCard provides AddCard document service
 func (w DocsHandlers) AddCard(ctx context.Context, in *proto.Card) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add card request")
@@ -24,6 +25,7 @@ func (w DocsHandlers) AddCard(ctx context.Context, in *proto.Card) (*proto.Empty
 	return &proto.Empty{}, err
 }
 
+// DeleteCard provides DeleteCard document service
 func (w DocsHandlers) DeleteCard(ctx context.Context, in *proto.Card) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("delete card request")
@@ -38,6 +40,7 @@ func (w DocsHandlers) DeleteCard(ctx context.Context, in *proto.Card) (*proto.Em
 	return &proto.Empty{}, nil
 }
 
+// UpdateCard provides UpdateCard document service
 func (w DocsHandlers) UpdateCard(ctx context.Context, in *proto.Card) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("update card request")

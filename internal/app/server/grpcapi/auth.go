@@ -14,6 +14,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AAA is interface of authorisation service
 type AAA interface {
 	Register(ctx context.Context, cred models.UserCredentials) error
 	Login(ctx context.Context, cred models.UserCredentials) (string, error)
@@ -30,6 +31,7 @@ func NewAuthHandlers(auth AAA) *AuthHandlers {
 	return &AuthHandlers{auth: auth}
 }
 
+// Register handles users registration
 func (a AuthHandlers) Register(ctx context.Context, in *proto.LoginCredentials) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).With("login", in.Login)
 	log.Debug("user registration request")
@@ -48,6 +50,7 @@ func (a AuthHandlers) Register(ctx context.Context, in *proto.LoginCredentials) 
 	return response, nil
 }
 
+// Login handles users logins
 func (a AuthHandlers) Login(ctx context.Context, in *proto.LoginCredentials) (*proto.Token, error) {
 	log := logger.Log().WithCtxRequestId(ctx).With("login", in.Login)
 	log.Debug("user login request")
@@ -67,6 +70,7 @@ func (a AuthHandlers) Login(ctx context.Context, in *proto.LoginCredentials) (*p
 	return response, nil
 }
 
+// Refresh handles token refresh method
 func (a AuthHandlers) Refresh(ctx context.Context, in *proto.Token) (*proto.Token, error) {
 	log := logger.Log().
 		WithCtxRequestId(ctx).

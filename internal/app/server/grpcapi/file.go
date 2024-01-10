@@ -15,6 +15,12 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddFile provides AddFile document service. Incoming files are sent in stream,
+// and should contain the following messages%
+// - File message with file metadada, but no binary. This message should be the furst.
+// - FileChunk message with binary data (up to 265k) and eof flag.
+// Eof flag MUST be set to true for the last chunk. If file has no  data (zero), then
+// FileChunk message MUST be sent after File message with zero data and eof = true
 func (w DocsHandlers) AddFile(stream proto.Docs_AddFileServer) error {
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()
@@ -23,6 +29,8 @@ func (w DocsHandlers) AddFile(stream proto.Docs_AddFileServer) error {
 	return w.withFileFromStream(stream, w.docs.AddFile)
 }
 
+// UpdateFile provides UpdateFile document service.
+// The same requirements as for AddFile method
 func (w DocsHandlers) UpdateFile(stream proto.Docs_UpdateFileServer) error {
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()
@@ -90,6 +98,7 @@ func (w DocsHandlers) withFileFromStream(stream proto.Docs_AddFileServer, fn fun
 	}
 }
 
+// DeleteFile provides DeleteFile document service
 func (w DocsHandlers) DeleteFile(ctx context.Context, in *proto.File) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("delete file request")
@@ -104,6 +113,10 @@ func (w DocsHandlers) DeleteFile(ctx context.Context, in *proto.File) (*proto.Em
 	return &proto.Empty{}, nil
 }
 
+// GetFile returns File with binary data. File is sent as a stream,
+// containing only one File message with FileInfo (it SHOULD be first).
+// Number of  up to 256k binary chunks, transporting file binary data.
+// The last chunk SHOULD have field `eof` with value `true`.
 func (w DocsHandlers) GetFile(in *proto.DocumentRequest, stream proto.Docs_GetFileServer) error {
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()

@@ -10,6 +10,7 @@ import (
 	"yap-pwkeeper/internal/pkg/logger"
 )
 
+// AddNote provides AddNote document service
 func (w DocsHandlers) AddNote(ctx context.Context, in *proto.Note) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add note request")
@@ -24,6 +25,7 @@ func (w DocsHandlers) AddNote(ctx context.Context, in *proto.Note) (*proto.Empty
 	return &proto.Empty{}, err
 }
 
+// DeleteNote provides DeleteNote document service
 func (w DocsHandlers) DeleteNote(ctx context.Context, in *proto.Note) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("delete note request")
@@ -38,6 +40,7 @@ func (w DocsHandlers) DeleteNote(ctx context.Context, in *proto.Note) (*proto.Em
 	return &proto.Empty{}, nil
 }
 
+// UpdateNote provides UpdateNote document service
 func (w DocsHandlers) UpdateNote(ctx context.Context, in *proto.Note) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("update note request")

@@ -44,7 +44,7 @@ type Card struct {
 	State      string `bson:"state"`
 }
 
-// File document consists of a fiie
+// File document is a named file with metadata
 type File struct {
 	Id       string `bson:"_id,omitempty"`
 	UserId   string `bson:"user_id"`

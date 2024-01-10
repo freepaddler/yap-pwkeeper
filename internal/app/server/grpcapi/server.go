@@ -1,3 +1,9 @@
+// Package grpcapi implements gRPC server API
+// as a mean of communication between server and client.
+// It consists of 2 services: Auth provides registration and authorization
+// services, along as token refresh. Auth methods are not protected with any
+// means. Docs service handle Documents operation requests. All it's methods
+// require token authorization.
 package grpcapi
 
 import (
@@ -24,10 +30,12 @@ type GRCPServer struct {
 	streamInterceptors []grpc.StreamServerInterceptor
 }
 
+// GetAddress returns server binding address
 func (gs *GRCPServer) GetAddress() string {
 	return gs.address
 }
 
+// New is a server instance constructor
 func New(opts ...func(gs *GRCPServer)) *GRCPServer {
 	gs := new(GRCPServer)
 	// setup logging
@@ -57,24 +65,29 @@ func New(opts ...func(gs *GRCPServer)) *GRCPServer {
 	return gs
 }
 
+// WithAddress allows to set server bind address
 func WithAddress(s string) func(gs *GRCPServer) {
 	return func(gs *GRCPServer) {
 		gs.address = s
 	}
 }
 
+// WithAuthHandlers defines handlers for Auth service
 func WithAuthHandlers(h *AuthHandlers) func(gs *GRCPServer) {
 	return func(gs *GRCPServer) {
 		gs.auth = h
 	}
 }
 
+// WithDocsHandlers defines handlers for Docs service
 func WithDocsHandlers(h *DocsHandlers) func(gs *GRCPServer) {
 	return func(gs *GRCPServer) {
 		gs.docs = h
 	}
 }
 
+// WithUnaryInterceptors adds unary server interceptors into the interceptors chain.
+// Execution order is the same as how they were added.
 func WithUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) func(server *GRCPServer) {
 	return func(gs *GRCPServer) {
 		// order makes sense
@@ -82,6 +95,8 @@ func WithUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) func(ser
 	}
 }
 
+// WithStreamInterceptors adds stream server interceptors into the interceptors chain.
+// Execution order is the same as how they were added.
 func WithStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) func(server *GRCPServer) {
 	return func(gs *GRCPServer) {
 		// order makes sense

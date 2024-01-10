@@ -8,6 +8,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddCard stores new Card in DataStorage
 func (c *Controller) AddCard(ctx context.Context, card models.Card) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add card request")
@@ -29,6 +30,8 @@ func (c *Controller) AddCard(ctx context.Context, card models.Card) error {
 	return err
 }
 
+// DeleteCard removes  Card from DataStorage. Actually only document payload is deleted,
+// but document id stays in DataStorage with Deleted flag
 func (c *Controller) DeleteCard(ctx context.Context, card models.Card) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", card.Id)
 	log.Debug("delete card request")
@@ -62,6 +65,7 @@ func (c *Controller) DeleteCard(ctx context.Context, card models.Card) error {
 	return err
 }
 
+// UpdateCard modifies the whole Card, leaving id intact.
 func (c *Controller) UpdateCard(ctx context.Context, card models.Card) error {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx).With("documentId", card.Id)
 	log.Debug("update card request")

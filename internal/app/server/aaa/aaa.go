@@ -1,3 +1,5 @@
+// Package aaa implements authorization and authentication methods
+// for clients.
 package aaa
 
 import (
@@ -19,6 +21,7 @@ var (
 	ErrToken     = errors.New("token generation failed")
 )
 
+// UserStorage is an interface where users login credentials are secure stored
 type UserStorage interface {
 	AddUser(ctx context.Context, user models.User) (models.User, error)
 	GetUserByLogin(ctx context.Context, login string) (models.User, error)
@@ -28,11 +31,13 @@ type Controller struct {
 	store UserStorage
 }
 
+// New is AAA constructor
 func New(store UserStorage) *Controller {
 	c := &Controller{store: store}
 	return c
 }
 
+// Register registers new user, and stores login/password in database backend.
 func (c *Controller) Register(ctx context.Context, cred models.UserCredentials) error {
 	log := logger.Log().WithCtxRequestId(ctx).With("login", cred.Login)
 	log.Debug("new user registration")
@@ -55,6 +60,7 @@ func (c *Controller) Register(ctx context.Context, cred models.UserCredentials) 
 	return nil
 }
 
+// Login authenticates users by login and password and returns authorization token.
 func (c *Controller) Login(ctx context.Context, cred models.UserCredentials) (string, error) {
 	log := logger.Log().WithCtxRequestId(ctx).With("login", cred.Login)
 	log.Debug("new user login")
@@ -87,6 +93,7 @@ func newSession(ctx context.Context, userid string) (string, error) {
 	return token, err
 }
 
+// Refresh issues new token instead of actual to provide continuous sessions.
 func (c *Controller) Refresh(ctx context.Context, token string) (string, error) {
 	log := logger.Log().WithCtxRequestId(ctx).
 		With("userId", jwtToken.GetTokenSubject(token), "sessionId", jwtToken.GetTokenSession(token))
@@ -105,6 +112,7 @@ func (c *Controller) Refresh(ctx context.Context, token string) (string, error) 
 	return newToken, err
 }
 
+// Validate is a method to check token validity
 func (c *Controller) Validate(_ context.Context, token string) bool {
 	return jwtToken.Valid(token)
 }

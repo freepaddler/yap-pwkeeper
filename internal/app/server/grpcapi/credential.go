@@ -10,6 +10,7 @@ import (
 	"yap-pwkeeper/internal/pkg/logger"
 )
 
+// AddCredential provides AddCredential document service
 func (w DocsHandlers) AddCredential(ctx context.Context, in *proto.Credential) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("add credential request")
@@ -24,6 +25,7 @@ func (w DocsHandlers) AddCredential(ctx context.Context, in *proto.Credential) (
 	return &proto.Empty{}, err
 }
 
+// DeleteCredential provides DeleteCredential document service
 func (w DocsHandlers) DeleteCredential(ctx context.Context, in *proto.Credential) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("delete credential request")
@@ -38,6 +40,7 @@ func (w DocsHandlers) DeleteCredential(ctx context.Context, in *proto.Credential
 	return &proto.Empty{}, nil
 }
 
+// UpdateCredential provides UpdateCredential document service
 func (w DocsHandlers) UpdateCredential(ctx context.Context, in *proto.Credential) (*proto.Empty, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("update credential request")

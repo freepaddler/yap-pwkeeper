@@ -12,6 +12,7 @@ import (
 	"yap-pwkeeper/internal/pkg/models"
 )
 
+// AddCredential places new Credential in the database
 func (db *Mongodb) AddCredential(ctx context.Context, credential models.Credential) (string, error) {
 	coll := db.client.Database(dbName).Collection(collCredentials)
 	res, err := coll.InsertOne(ctx, credential)
@@ -22,6 +23,7 @@ func (db *Mongodb) AddCredential(ctx context.Context, credential models.Credenti
 	return oid, err
 }
 
+// GetCredential returns Credential from database
 func (db *Mongodb) GetCredential(ctx context.Context, docId string, userId string) (models.Credential, error) {
 	coll := db.client.Database(dbName).Collection(collCredentials)
 	credential := models.Credential{}
@@ -42,6 +44,8 @@ func (db *Mongodb) GetCredential(ctx context.Context, docId string, userId strin
 	return credential, err
 }
 
+// ModifyCredential updates record in database. Also called in delete action, because deleted
+// documents are only marked for with a flag, but not actually deleted.
 func (db *Mongodb) ModifyCredential(ctx context.Context, credential models.Credential) error {
 	coll := db.client.Database(dbName).Collection(collCredentials)
 	id, err := primitive.ObjectIDFromHex(credential.Id)
@@ -67,6 +71,7 @@ func (db *Mongodb) ModifyCredential(ctx context.Context, credential models.Crede
 	return err
 }
 
+// GetCredentialsStream produces stream of Credentials updates, happened between minSerial and maxSerial
 func (db *Mongodb) GetCredentialsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collCredentials)
 	filter := bson.D{
