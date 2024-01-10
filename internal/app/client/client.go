@@ -36,6 +36,7 @@ type DataStore interface {
 
 	GetFilesList() []*models.File
 	GetFileInfo(id string) *models.File
+	GetFile(documentId string, path string) error
 	AddFile(d models.File, filename string) error
 	UpdateFileInfo(d models.File) error
 	UpdateFile(d models.File, filename string) error
@@ -50,6 +51,7 @@ type App struct {
 	itemsList  *tview.List
 	form       *tview.Form
 	statusBar  *tview.Form
+	useMouse   bool
 }
 
 // New is UI app constructor
@@ -70,6 +72,12 @@ func WithDataStore(ds DataStore) func(a *App) {
 	}
 }
 
+func WithMouse(m bool) func(a *App) {
+	return func(a *App) {
+		a.useMouse = m
+	}
+}
+
 // bootstrap creates all ui pages and should be run only once
 func (a *App) bootstrap() {
 	a.pages = tview.NewPages()
@@ -78,7 +86,7 @@ func (a *App) bootstrap() {
 	a.itemsList = tview.NewList()
 	a.form = tview.NewForm()
 	a.statusBar.AddTextView("Quit: `Esc`, Sync `S`", "", 1, 1, true, false)
-	a.ui.SetRoot(a.pages, true).EnableMouse(false)
+	a.ui.SetRoot(a.pages, true).EnableMouse(a.useMouse)
 	a.mainPage()
 	a.welcomePage()
 }

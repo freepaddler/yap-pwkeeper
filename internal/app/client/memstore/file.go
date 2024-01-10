@@ -2,13 +2,14 @@ package memstore
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"sort"
 
 	"yap-pwkeeper/internal/pkg/models"
 )
 
-// GetFile returns File from store
+// GetFileInfo returns FileInfo from store
 func (s *Store) GetFileInfo(id string) *models.File {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -43,6 +44,20 @@ func (s *Store) AddFile(d models.File, filename string) error {
 	d.Size = st.Size()
 	d.Filename = st.Name()
 	return s.checkAuthErr(s.server.AddFile(d, f))
+}
+
+// GetFile downloads File from server
+func (s *Store) GetFile(documentId string, path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("unable to open file for writing: %w", err)
+	}
+	defer func() { _ = f.Close() }()
+	_, err = s.server.GetFile(documentId, f)
+	if err != nil {
+		return s.checkAuthErr(err)
+	}
+	return nil
 }
 
 // UpdateFile Updates File on server

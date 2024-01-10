@@ -1,12 +1,15 @@
 package client
 
 import (
+	"os"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 const (
-	pageModal = "modal"
+	pageModal    = "modal"
+	pageDownload = "pageDownload"
 )
 
 // modalErr shows error in modal window
@@ -65,6 +68,51 @@ func (a *App) modalExit() {
 			a.ui.SetFocus(f)
 		})
 	a.pages.AddPage(pageModal, m, true, true)
+}
+
+// fileInput draws input field to download file
+func (a *App) fileInput(documentId, fname string) {
+	var filename string
+	cancelFunc := func() {
+		a.pages.RemovePage(pageDownload)
+		a.ui.SetFocus(a.form)
+	}
+	form := tview.NewForm().SetCancelFunc(cancelFunc)
+	form.AddInputField("Download to:", "", 45, nil, func(text string) {
+		filename = text
+	})
+	form.AddButton("Download", func() {
+		if filename == "" {
+			a.modalErr("Please enter path to save file")
+			return
+		}
+		st, _ := os.Stat(filename)
+		if st != nil && st.IsDir() {
+			filename = filename + string(os.PathSeparator) + fname
+		}
+		if _, err := os.Stat(filename); err == nil {
+			a.modalErr("File already exists, please enter another path.")
+			return
+		}
+		a.pages.RemovePage(pageDownload)
+		a.ui.SetFocus(a.form)
+		a.modifyRequest(
+			func() error {
+				return a.store.GetFile(documentId, filename)
+			},
+			"File saved to: "+filename,
+			"Failed to save File",
+		)
+
+	})
+	form.AddButton("<< Cancel", func() {
+		cancelFunc()
+	})
+
+	form.SetButtonsAlign(tview.AlignCenter)
+	form.SetBorder(true)
+	form.SetTitle(" Enter path where to save " + fname + " ")
+	a.pages.AddPage(pageDownload, center(62, 7, form), true, true)
 }
 
 func center(width, height int, p tview.Primitive) tview.Primitive {

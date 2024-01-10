@@ -302,7 +302,7 @@ func (a *App) filesForm(cred *models.File, formType int) {
 		a.form.AddInputField("Path to NEW file", "", 50, nil, func(text string) {
 			newFile = text
 		})
-		a.form.AddTextView("File Info", fmt.Sprintf("[green]File Name: [white]%s\n[green]File Size: [white]%d bytes", doc.Filename, doc.Size), 50, 2, true, false)
+		a.form.AddTextView("File Info", fmt.Sprintf("[green]File Name[white]: %s\n[green]File Size: [white]%d bytes", doc.Filename, doc.Size), 50, 2, true, false)
 		a.form.GetFormItemByLabel("File Info").SetDisabled(true)
 	}
 	a.drawMetadata(&doc.Metadata)
@@ -338,9 +338,9 @@ func (a *App) filesForm(cred *models.File, formType int) {
 			)
 		})
 	case formModify:
-		//a.form.AddButton("Download File", func() {
-		//
-		//})
+		a.form.AddButton("Download", func() {
+			a.fileInput(doc.Id, doc.Filename)
+		})
 		a.form.AddButton("Save", func() {
 			if doc.Name == "" {
 				a.modalErr("Document name should not be empty")

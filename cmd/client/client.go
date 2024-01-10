@@ -67,6 +67,7 @@ func main() {
 
 	ui := client.New(
 		client.WithDataStore(store),
+		client.WithMouse(conf.UseMouse),
 	)
 	log.Println("starting ui")
 

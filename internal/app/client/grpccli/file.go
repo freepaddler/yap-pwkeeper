@@ -111,3 +111,37 @@ func (c *Client) DeleteFile(d models.File) error {
 	}
 	return nil
 }
+
+// GetFile receives File from server
+func (c *Client) GetFile(documentId string, w io.Writer) (models.File, error) {
+	log.Println("grpc get file request")
+	ctx, cancel := context.WithTimeout(context.Background(), c.dataTimeout)
+	defer cancel()
+	ctx = metadata.AppendToOutgoingContext(ctx, "bearer", c.getToken())
+	file := models.File{}
+	req := &proto.DocumentRequest{Id: documentId}
+	stream, err := c.docs.GetFile(ctx, req)
+	if err != nil {
+		return file, parseErr(err)
+	}
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			return file, nil
+		}
+		if err != nil {
+			return file, parseErr(err)
+		}
+		switch resp.ChunkedFile.(type) {
+		case *proto.FileStream_File:
+			file, err = resp.ChunkedFile.(*proto.FileStream_File).File.ToFile()
+			if err != nil {
+				return file, parseErr(err)
+			}
+		case *proto.FileStream_Chunk:
+			if _, err := w.Write(resp.ChunkedFile.(*proto.FileStream_Chunk).Chunk.Data); err != nil {
+				return file, errors.New("failed to write to file")
+			}
+		}
+	}
+}

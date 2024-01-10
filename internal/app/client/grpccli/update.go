@@ -10,6 +10,7 @@ import (
 	"yap-pwkeeper/internal/pkg/grpc/proto"
 )
 
+// GetUpdateStream requests stream with updates from server
 func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr chan error) {
 	defer func() {
 		close(chData)
@@ -45,7 +46,6 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 				log.Printf("grpc update: invalid note: %s", err)
 				continue
 			}
-			//log.Printf("note %v", note)
 			chData <- note
 		case *proto.UpdateResponse_Credential:
 			cred, err := update.Credential.ToCredential()
@@ -53,7 +53,6 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 				log.Printf("grpc update: invalid credential: %s", err)
 				continue
 			}
-			//log.Printf("credential %v", cred)
 			chData <- cred
 		case *proto.UpdateResponse_Card:
 			card, err := update.Card.ToCard()
@@ -61,7 +60,6 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 				log.Printf("grpc update: invalid card: %s", err)
 				continue
 			}
-			//log.Printf("card %v", card)
 			chData <- card
 		case *proto.UpdateResponse_File:
 			file, err := update.File.ToFile()
@@ -69,7 +67,6 @@ func (c *Client) GetUpdateStream(serial int64, chData chan interface{}, chErr ch
 				log.Printf("grpc update: invalid file: %s", err)
 				continue
 			}
-			log.Printf("file %v", file)
 			chData <- file
 		}
 		counter++

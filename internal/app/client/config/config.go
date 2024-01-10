@@ -12,10 +12,11 @@ const (
 )
 
 type Config struct {
-	Logfile string
-	Log     bool
-	Version bool
-	Address string
+	Logfile  string
+	Log      bool
+	Version  bool
+	Address  string
+	UseMouse bool
 }
 
 func New() *Config {
@@ -34,6 +35,9 @@ func New() *Config {
 		Envar("LISTEN_ADDRESS").
 		Default(defaultAddress).
 		StringVar(&c.Address)
+	kingpin.Flag("mouse", "enable mouse support (may be unstable)").
+		Short('m').
+		BoolVar(&c.UseMouse)
 	kingpin.Parse()
 	return &c
 }

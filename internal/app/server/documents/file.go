@@ -11,7 +11,7 @@ import (
 func (c *Controller) GetFile(ctx context.Context, docId string, userId string) (models.File, error) {
 	log := logger.Log().WithCtxRequestId(ctx).WithCtxUserId(ctx)
 	log.Debug("get file request")
-	return c.GetFile(ctx, docId, userId)
+	return c.store.GetFile(ctx, docId, userId)
 }
 
 func (c *Controller) AddFile(ctx context.Context, file models.File) error {

@@ -37,6 +37,7 @@ type DocServer interface {
 	UpdateCredential(d models.Credential) error
 	DeleteCredential(d models.Credential) error
 
+	GetFile(documentId string, w io.Writer) (models.File, error)
 	AddFile(d models.File, r io.Reader) error
 	UpdateFileInfo(d models.File) error
 	UpdateFile(d models.File, r io.Reader) error
