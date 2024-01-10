@@ -72,7 +72,6 @@ func main() {
 	log.Println("starting ui")
 
 	if err := ui.Run(); err != nil {
-		//log.SetOutput(os.Stderr)
 		log.Println("ui terminated")
 	}
 

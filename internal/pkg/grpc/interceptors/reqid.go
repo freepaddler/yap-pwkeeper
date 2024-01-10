@@ -12,6 +12,7 @@ import (
 
 const requestIdHeader = "request-id"
 
+// ReqIdStreamServer assigns unique identification to each streaming request
 func ReqIdStreamServer(srv interface{}, stream grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	ctx, mdOut := setReqId(stream.Context())
 	if err := grpc.SetHeader(ctx, mdOut); err != nil {
@@ -20,6 +21,7 @@ func ReqIdStreamServer(srv interface{}, stream grpc.ServerStream, _ *grpc.Stream
 	return handler(srv, &serverStreamWrapped{stream, ctx})
 }
 
+// ReqIdUnaryServer is the same as ReqIdStreamServer, but for unary requests
 func ReqIdUnaryServer(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	ctx, mdOut := setReqId(ctx)
 	if err := grpc.SetHeader(ctx, mdOut); err != nil {

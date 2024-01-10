@@ -1,3 +1,4 @@
+// Package interceptors adds necessary interceptors for gRCP server
 package interceptors
 
 import (

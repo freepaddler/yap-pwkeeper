@@ -13,6 +13,7 @@ const (
 	formModify
 )
 
+// clearForm clears form screen
 func (a *App) clearForm() {
 	a.form.Clear(true).SetCancelFunc(func() {
 		if a.itemsList.GetItemCount() > 0 {

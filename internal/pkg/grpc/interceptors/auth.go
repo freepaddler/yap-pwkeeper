@@ -15,6 +15,9 @@ import (
 
 const authHeader = "Bearer"
 
+// AuthStreamServer validates requests authorisation. Checks FWT tokens and adds userId to context.
+// It is implementations for streaming requests .Valid is token validation function.
+// ApplyTo allows to set up gRPC services and methods, where interceptor should be run.
 func AuthStreamServer(valid func(context.Context, string) bool, applyTo ...string) func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	return func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		ctx := stream.Context()
@@ -44,6 +47,7 @@ func AuthStreamServer(valid func(context.Context, string) bool, applyTo ...strin
 	}
 }
 
+// AuthUnaryServer is same auth interceptor as AuthStreamServer, but for unary requests
 func AuthUnaryServer(valid func(context.Context, string) bool, applyTo ...string) func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		apply := make(map[string]bool)
@@ -72,6 +76,7 @@ func AuthUnaryServer(valid func(context.Context, string) bool, applyTo ...string
 	}
 }
 
+// applicable checks whether interceptor should be run for service and/or method
 func applicable(apply map[string]bool, si string) bool {
 	if len(apply) == 0 {
 		return true

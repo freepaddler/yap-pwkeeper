@@ -10,6 +10,7 @@ const (
 	pageRoot = "root"
 )
 
+// DataStore defines all store methods
 type DataStore interface {
 	Register(login, password string) error
 	Login(login, password string) error
@@ -66,12 +67,14 @@ func New(options ...func(a *App)) *App {
 	return app
 }
 
+// WithDataStore attaches storage to app instance
 func WithDataStore(ds DataStore) func(a *App) {
 	return func(a *App) {
 		a.store = ds
 	}
 }
 
+// WithMouse enables mouse in tui (may be not stable)
 func WithMouse(m bool) func(a *App) {
 	return func(a *App) {
 		a.useMouse = m
@@ -93,8 +96,6 @@ func (a *App) bootstrap() {
 
 // Run starts application
 func (a *App) Run() error {
-	//a.pages.SwitchToPage(pageRoot)
-	//a.ui.SetFocus(a.categories)
 	return a.ui.Run()
 }
 

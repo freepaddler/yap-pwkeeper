@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+// ZapLogger logs all gRPC requests final results
 func ZapLogger(l *zap.Logger) logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
 		f := make([]zap.Field, 0, len(fields)/2)
@@ -47,6 +48,7 @@ func ZapLogger(l *zap.Logger) logging.Logger {
 	})
 }
 
+// LoggingFields adds defined context fields to log messaged
 func LoggingFields(ctx context.Context) logging.Fields {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
