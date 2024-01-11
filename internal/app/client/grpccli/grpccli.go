@@ -7,27 +7,32 @@
 package grpccli
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
+	"fmt"
+	"os"
 	"sync"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
 	"yap-pwkeeper/internal/pkg/grpc/proto"
 )
 
 type Client struct {
-	address                   string           // server address
-	conn                      *grpc.ClientConn // server connection
-	auth                      proto.AuthClient // server auth service
-	docs                      proto.DocsClient // server documents service
-	authTimeout               time.Duration    // timeout for auth service
-	dataTimeout               time.Duration    // timeout for documents service
-	tokenTimeUntilExpire      time.Duration    // time left until token expired
-	tokenRefreshRetryInterval time.Duration    // token refresh retry
+	address                   string                           // server address
+	tlsCredentials            credentials.TransportCredentials // tls setup
+	conn                      *grpc.ClientConn                 // server connection
+	auth                      proto.AuthClient                 // server auth service
+	docs                      proto.DocsClient                 // server documents service
+	authTimeout               time.Duration                    // timeout for auth service
+	dataTimeout               time.Duration                    // timeout for documents service
+	tokenTimeUntilExpire      time.Duration                    // time left until token expired
+	tokenRefreshRetryInterval time.Duration                    // token refresh retry
 	token                     string
 	ch                        chan struct{} // token refresher control chan
 	mu                        sync.RWMutex  // token and chan mutex
@@ -49,7 +54,7 @@ func New(address string, options ...func(c *Client)) (*Client, error) {
 	var err error
 	cli.conn, err = grpc.Dial(
 		cli.address,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTransportCredentials(cli.tlsCredentials),
 	)
 	cli.auth = proto.NewAuthClient(cli.conn)
 	cli.docs = proto.NewDocsClient(cli.conn)
@@ -73,6 +78,13 @@ func WithTokenRefresh(tokenTimeUntilExpire, tokenRefreshRetryInterval time.Durat
 	return func(c *Client) {
 		c.tokenTimeUntilExpire = tokenTimeUntilExpire
 		c.tokenRefreshRetryInterval = tokenRefreshRetryInterval
+	}
+}
+
+// WithTransportCredentials sets up connection transport security
+func WithTransportCredentials(cred credentials.TransportCredentials) func(c *Client) {
+	return func(c *Client) {
+		c.tlsCredentials = cred
 	}
 }
 
@@ -103,11 +115,33 @@ func parseErr(err error) error {
 	case codes.Unauthenticated:
 		return ErrAuthFail
 	case codes.Unavailable:
-		return ErrUnavailable
+		return fmt.Errorf("%w: %w", ErrUnavailable, err)
 	default:
 		if st.Message() == "" {
 			return errors.New(st.Code().String())
 		}
 		return errors.New(st.Message())
 	}
+}
+
+// LoadCACertificate reads CA certificate from file and returns secure config for gRPC client
+// insecure flag disables verification of server certificate
+func LoadCACertificate(caFile string, insecure bool) (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed server's certificate
+	caCertificate, err := os.ReadFile(caFile)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(caCertificate) {
+		return nil, fmt.Errorf("failed to add CA certificate: %w", err)
+	}
+
+	config := &tls.Config{
+		RootCAs:            certPool,
+		InsecureSkipVerify: insecure,
+	}
+
+	return credentials.NewTLS(config), nil
 }

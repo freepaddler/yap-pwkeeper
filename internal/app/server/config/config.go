@@ -52,11 +52,11 @@ func New() *Config {
 		StringVar(&c.TokenKey)
 	kingpin.Flag(
 		"tls-cert-file",
-		"path server tls certificate. enables tls. certificate file should contain full certificate chain, including intermediate CA certificates ",
+		"path to server tls certificate file. This flag mandatory enables tls. Certificate file should contain full certificate chain, including intermediate CA certificates (if any).",
 	).Envar("TLS_CERT_FILE").StringVar(&c.TLSCertFile)
 	kingpin.Flag(
 		"tls-key-file",
-		"path server tls certificate key. enables tls. ",
+		"path to server tls certificate key file",
 	).Envar("TLS_KEY_FILE").StringVar(&c.TLSKeyFile)
 	kingpin.Parse()
 	return &c

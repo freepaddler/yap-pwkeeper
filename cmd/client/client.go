@@ -5,6 +5,9 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	"yap-pwkeeper/internal/app/client"
 	"yap-pwkeeper/internal/app/client/config"
@@ -53,9 +56,24 @@ func main() {
 		log.SetOutput(io.Discard)
 	}
 
+	// enable tls connection to server
+	tlsCredentials := insecure.NewCredentials()
+	if conf.TlsCaCertFile != "" {
+		var err error
+		tlsCredentials, err = grpccli.LoadCACertificate(conf.TlsCaCertFile, conf.TlsInsecure)
+		if err != nil {
+			log.Printf("unable to load CA certificate: %s", err)
+			return
+		}
+	}
+
 	// setup grpc client
 	log.Println("setup server connection...")
-	grpcClient, err := grpccli.New(conf.Address)
+	grpcClient, err := grpccli.New(conf.Address,
+		grpccli.WithTransportCredentials(tlsCredentials),
+		grpccli.WithTimeouts(5*time.Second, 30*time.Second),
+		grpccli.WithTokenRefresh(2*time.Minute, 5*time.Second),
+	)
 	if err != nil {
 		log.Printf("server connection setup failed: %s", err.Error())
 		exitCode = 1
@@ -70,6 +88,11 @@ func main() {
 		client.WithMouse(conf.UseMouse),
 	)
 	log.Println("starting ui")
+
+	// disable log output
+	if conf.Logfile == "" {
+		log.SetOutput(io.Discard)
+	}
 
 	if err := ui.Run(); err != nil {
 		log.Println("ui terminated")

@@ -12,11 +12,13 @@ const (
 )
 
 type Config struct {
-	Logfile  string
-	Log      bool
-	Version  bool
-	Address  string
-	UseMouse bool
+	Logfile       string
+	Log           bool
+	Version       bool
+	Address       string
+	UseMouse      bool
+	TlsCaCertFile string
+	TlsInsecure   bool
 }
 
 func New() *Config {
@@ -32,12 +34,20 @@ func New() *Config {
 	kingpin.Flag("version", "print version").Short('v').BoolVar(&c.Version)
 	kingpin.Flag("address", "server address host:port").
 		Short('a').
-		Envar("LISTEN_ADDRESS").
+		Envar("SERVER_ADDRESS").
 		Default(defaultAddress).
 		StringVar(&c.Address)
 	kingpin.Flag("mouse", "enable mouse support (may be unstable)").
 		Short('m').
 		BoolVar(&c.UseMouse)
+	kingpin.Flag(
+		"tls-ca-file",
+		"path to CA tls certificate. Enables secured server connection",
+	).Envar("TLS_CACERT_FILE").StringVar(&c.TlsCaCertFile)
+	kingpin.Flag(
+		"tls-insecure",
+		"disables validation of server certificate. use for testing only.",
+	).Envar("TLS_INSECURE").BoolVar(&c.TlsInsecure)
 	kingpin.Parse()
 	return &c
 }

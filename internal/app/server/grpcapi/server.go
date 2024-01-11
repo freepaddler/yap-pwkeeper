@@ -29,7 +29,7 @@ type GRCPServer struct {
 	docs               *DocsHandlers
 	unaryInterceptors  []grpc.UnaryServerInterceptor
 	streamInterceptors []grpc.StreamServerInterceptor
-	transportCred      credentials.TransportCredentials
+	tlsCredentials     credentials.TransportCredentials
 }
 
 // GetAddress returns server binding address
@@ -59,7 +59,7 @@ func New(opts ...func(gs *GRCPServer)) *GRCPServer {
 		o(gs)
 	}
 	gs.Server = grpc.NewServer(
-		grpc.Creds(gs.transportCred),
+		grpc.Creds(gs.tlsCredentials),
 		grpc.ChainUnaryInterceptor(gs.unaryInterceptors...),
 		grpc.ChainStreamInterceptor(gs.streamInterceptors...),
 	)
@@ -108,9 +108,10 @@ func WithStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) func(s
 	}
 }
 
+// WithTransportCredentials sets up secure server connection
 func WithTransportCredentials(cred credentials.TransportCredentials) func(server *GRCPServer) {
 	return func(gs *GRCPServer) {
-		gs.transportCred = cred
+		gs.tlsCredentials = cred
 	}
 }
 
