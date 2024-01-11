@@ -25,11 +25,7 @@ var (
 
 func main() {
 	exitCode := 0
-	defer func() {
-		//log.SetOutput(os.Stderr)
-		log.Printf("application exited with code: %d\n", exitCode)
-		os.Exit(exitCode)
-	}()
+
 	// print version
 	version()
 
@@ -40,6 +36,12 @@ func main() {
 	if conf.Version {
 		return
 	}
+
+	defer func() {
+		//log.SetOutput(os.Stderr)
+		log.Printf("application exited with code: %d\n", exitCode)
+		os.Exit(exitCode)
+	}()
 
 	// setup logging
 	if conf.Log {

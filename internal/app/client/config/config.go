@@ -31,7 +31,7 @@ func New() *Config {
 	kingpin.Flag("logfile", "log file name").
 		Envar("LOGFILE").
 		StringVar(&c.Logfile)
-	kingpin.Flag("version", "print version").Short('v').BoolVar(&c.Version)
+	kingpin.Flag("version", "print version and exit").Short('v').BoolVar(&c.Version)
 	kingpin.Flag("address", "server address host:port").
 		Short('a').
 		Envar("SERVER_ADDRESS").
@@ -42,11 +42,11 @@ func New() *Config {
 		BoolVar(&c.UseMouse)
 	kingpin.Flag(
 		"tls-ca-file",
-		"path to CA tls certificate. Enables secured server connection",
+		"path to CA tls certificate, enables secured server connection",
 	).Envar("TLS_CACERT_FILE").StringVar(&c.TlsCaCertFile)
 	kingpin.Flag(
 		"tls-insecure",
-		"disables validation of server certificate. use for testing only.",
+		"disables validation of server certificate, use for testing only",
 	).Envar("TLS_INSECURE").BoolVar(&c.TlsInsecure)
 	kingpin.Parse()
 	return &c

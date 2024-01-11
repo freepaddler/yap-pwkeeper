@@ -9,8 +9,8 @@ import (
 
 const (
 	defaultLogLevel = "0"
-	defaultDbUri    = "mongodb://localhost:27017"
-	defaultAddress  = "127.0.0.1:3200"
+	defaultDbUri    = "mongodb://mongo:27017"
+	defaultAddress  = "0.0.0.0:3200"
 )
 
 type Config struct {
@@ -35,7 +35,7 @@ func New() *Config {
 		IntVar(&c.LogLevel)
 	kingpin.Flag("debug", "enable debug mode").
 		BoolVar(&c.Debug)
-	kingpin.Flag("version", "print version").Short('v').BoolVar(&c.Version)
+	kingpin.Flag("version", "print version and exit").Short('v').BoolVar(&c.Version)
 	kingpin.Flag("db-uri", "database connection string").
 		Short('d').
 		Envar("DB_URI").
