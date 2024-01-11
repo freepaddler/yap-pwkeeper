@@ -13,6 +13,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
 	"yap-pwkeeper/internal/app/server/documents"
@@ -28,6 +29,7 @@ type GRCPServer struct {
 	docs               *DocsHandlers
 	unaryInterceptors  []grpc.UnaryServerInterceptor
 	streamInterceptors []grpc.StreamServerInterceptor
+	transportCred      credentials.TransportCredentials
 }
 
 // GetAddress returns server binding address
@@ -57,9 +59,11 @@ func New(opts ...func(gs *GRCPServer)) *GRCPServer {
 		o(gs)
 	}
 	gs.Server = grpc.NewServer(
+		grpc.Creds(gs.transportCred),
 		grpc.ChainUnaryInterceptor(gs.unaryInterceptors...),
 		grpc.ChainStreamInterceptor(gs.streamInterceptors...),
 	)
+
 	pb.RegisterAuthServer(gs.Server, gs.auth)
 	pb.RegisterDocsServer(gs.Server, gs.docs)
 	return gs
@@ -101,6 +105,12 @@ func WithStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) func(s
 	return func(gs *GRCPServer) {
 		// order makes sense
 		gs.streamInterceptors = append(gs.streamInterceptors, interceptors...)
+	}
+}
+
+func WithTransportCredentials(cred credentials.TransportCredentials) func(server *GRCPServer) {
+	return func(gs *GRCPServer) {
+		gs.transportCred = cred
 	}
 }
 

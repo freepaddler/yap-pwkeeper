@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"google.golang.org/grpc/credentials"
+
 	"yap-pwkeeper/internal/app/server"
 	"yap-pwkeeper/internal/app/server/aaa"
 	"yap-pwkeeper/internal/app/server/config"
@@ -95,9 +97,21 @@ func main() {
 	// documents controller
 	docs := documents.New(db)
 
+	// enable tls
+	var tlsCredentials credentials.TransportCredentials
+	if conf.TLSCertFile != "" || conf.TLSKeyFile != "" {
+		tlsCredentials, err = credentials.NewServerTLSFromFile(conf.TLSCertFile, conf.TLSKeyFile)
+		if err != nil {
+			logger.Log().WithErr(err).Error("unable to load server certificate or key")
+			exitCode = 1
+			return
+		}
+	}
+
 	// setup grpc
 	gs := grpcapi.New(
 		grpcapi.WithAddress(conf.Address),
+		grpcapi.WithTransportCredentials(tlsCredentials),
 		grpcapi.WithUnaryInterceptors(interceptors.AuthUnaryServer(auth.Validate, "Docs/")),
 		grpcapi.WithStreamInterceptors(interceptors.AuthStreamServer(auth.Validate, "Docs/")),
 		grpcapi.WithAuthHandlers(grpcapi.NewAuthHandlers(auth)),

@@ -16,7 +16,7 @@ import (
 )
 
 // AddFile provides AddFile document service. Incoming files are sent in stream,
-// and should contain the following messages%
+// and should contain the following messages:
 // - File message with file metadada, but no binary. This message should be the furst.
 // - FileChunk message with binary data (up to 265k) and eof flag.
 // Eof flag MUST be set to true for the last chunk. If file has no  data (zero), then

@@ -14,12 +14,14 @@ const (
 )
 
 type Config struct {
-	LogLevel int
-	Debug    bool
-	Version  bool
-	DbUri    string
-	Address  string
-	TokenKey string
+	LogLevel    int
+	Debug       bool
+	Version     bool
+	DbUri       string
+	Address     string
+	TokenKey    string
+	TLSCertFile string
+	TLSKeyFile  string
 }
 
 func New() *Config {
@@ -48,6 +50,14 @@ func New() *Config {
 		Short('k').
 		Envar("TOKEN_KEY").
 		StringVar(&c.TokenKey)
+	kingpin.Flag(
+		"tls-cert-file",
+		"path server tls certificate. enables tls. certificate file should contain full certificate chain, including intermediate CA certificates ",
+	).Envar("TLS_CERT_FILE").StringVar(&c.TLSCertFile)
+	kingpin.Flag(
+		"tls-key-file",
+		"path server tls certificate key. enables tls. ",
+	).Envar("TLS_KEY_FILE").StringVar(&c.TLSKeyFile)
 	kingpin.Parse()
 	return &c
 }
