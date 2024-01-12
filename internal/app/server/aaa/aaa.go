@@ -22,6 +22,8 @@ var (
 )
 
 // UserStorage is an interface where users login credentials are secure stored
+//
+//go:generate mockgen -source $GOFILE -package=mocks -destination ../../../../mocks/server_aaa_mock.go
 type UserStorage interface {
 	AddUser(ctx context.Context, user models.User) (models.User, error)
 	GetUserByLogin(ctx context.Context, login string) (models.User, error)

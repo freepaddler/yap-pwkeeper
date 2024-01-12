@@ -48,12 +48,4 @@ func Test_applicable(t *testing.T) {
 		got := applicable(tt.apply, tt.request)
 		require.Equalf(t, tt.want, got, "expect %t got %t for request %s with map %v", tt.want, got, tt.request, tt.apply)
 	}
-	//apply := make(map[string]bool)
-	//str := "/grpcapi.Wallet/AddCredential"
-	//apply["some"] = true
-	//fmt.Println(applicable(apply, str))
-	//apply["Wallet/AddCred"] = true
-	//fmt.Println(applicable(apply, str))
-	//apply["Wallet/AddCredential1"] = true
-	//fmt.Println(applicable(apply, str))
 }
