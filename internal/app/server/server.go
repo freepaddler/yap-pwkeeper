@@ -9,12 +9,7 @@ import (
 
 	"yap-pwkeeper/internal/app/server/grpcapi"
 	"yap-pwkeeper/internal/pkg/logger"
-	"yap-pwkeeper/internal/pkg/models"
 )
-
-type UserController interface {
-	Register(credentials models.UserCredentials) (models.User, error)
-}
 
 type App struct {
 	wg sync.WaitGroup
