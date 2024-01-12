@@ -14,6 +14,8 @@ import (
 )
 
 // Source is the interface to reserve next bunch of serials.
+//
+//go:generate mockgen -source $GOFILE -package=mocks -destination ../../../../mocks/serial_mock.go
 type Source interface {
 	GetSerials(ctx context.Context, n int) (int64, error)
 }
