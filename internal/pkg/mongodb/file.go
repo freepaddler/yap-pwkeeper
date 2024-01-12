@@ -39,8 +39,8 @@ func (db *Mongodb) ModifyFile(ctx context.Context, file models.File) error {
 		File: file,
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", file.UserId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: file.UserId},
 	}
 	var result interface{}
 	err = coll.FindOneAndReplace(ctx, filter, newFile).Decode(&result)
@@ -59,13 +59,13 @@ func (db *Mongodb) ModifyFileInfo(ctx context.Context, file models.File) error {
 		return err
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", file.UserId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: file.UserId},
 	}
 	update := bson.D{
-		{"$set", bson.D{{"serial", file.Serial}}},
-		{"$set", bson.D{{"name", file.Name}}},
-		{"$set", bson.D{{"metadata", file.Metadata}}},
+		{Key: "$set", Value: bson.D{{Key: "serial", Value: file.Serial}}},
+		{Key: "$set", Value: bson.D{{Key: "name", Value: file.Name}}},
+		{Key: "$set", Value: bson.D{{Key: "metadata", Value: file.Metadata}}},
 	}
 	res, err := coll.UpdateOne(ctx, filter, update)
 	if err != nil {
@@ -95,12 +95,12 @@ func (db *Mongodb) getFile(ctx context.Context, docId string, userId string, wit
 		return file, err
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", userId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: userId},
 	}
 	opts := options.FindOne()
 	if withoutData {
-		opts = opts.SetProjection(bson.D{{"data", 0}})
+		opts = opts.SetProjection(bson.D{{Key: "data", Value: 0}})
 	}
 	if err := coll.FindOne(ctx, filter, opts).Decode(&file); err != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
@@ -115,11 +115,11 @@ func (db *Mongodb) getFile(ctx context.Context, docId string, userId string, wit
 func (db *Mongodb) GetFilesInfoStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collFiles)
 	filter := bson.D{
-		{"user_id", userId},
-		{"serial", bson.D{{"$gt", minSerial}}},
-		{"serial", bson.D{{"$lt", maxSerial}}},
+		{Key: "user_id", Value: userId},
+		{Key: "serial", Value: bson.D{{Key: "$gt", Value: minSerial}}},
+		{Key: "serial", Value: bson.D{{Key: "$lt", Value: maxSerial}}},
 	}
-	opts := options.Find().SetProjection(bson.D{{"data", 0}})
+	opts := options.Find().SetProjection(bson.D{{Key: "data", Value: 0}})
 	cursor, err := coll.Find(ctx, filter, opts)
 	if err != nil {
 		return err

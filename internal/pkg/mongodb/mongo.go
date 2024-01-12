@@ -58,7 +58,7 @@ func (db *Mongodb) createIndexes(ctx context.Context) error {
 	// unique index login @users
 	coll := db.client.Database(dbName).Collection(collUsers)
 	userLogin := mongo.IndexModel{
-		Keys:    bson.D{{"login", 1}},
+		Keys:    bson.D{{Key: "login", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
 	logger.Log().Infof("create index: login 1 unique for collection %s", collUsers)
@@ -69,7 +69,7 @@ func (db *Mongodb) createIndexes(ctx context.Context) error {
 
 	// documents search indexes
 	search := mongo.IndexModel{
-		Keys: bson.D{{"serial", -1}, {"user_id", 1}},
+		Keys: bson.D{{Key: "serial", Value: -1}, {Key: "user_id", Value: 1}},
 	}
 	for _, v := range []string{collCards, collNotes, collSerials} {
 		coll = db.client.Database(dbName).Collection(v)

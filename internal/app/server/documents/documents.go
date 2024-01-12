@@ -23,6 +23,8 @@ var (
 )
 
 // DocStorage defines interface to be implemented by storage backend
+//
+//go:generate mockgen -source $GOFILE -package=mocks -destination ../../../../mocks/server_docstorage_mock.go
 type DocStorage interface {
 	AddNote(ctx context.Context, note models.Note) (string, error)
 	GetNote(ctx context.Context, docId string, userId string) (models.Note, error)

@@ -31,8 +31,8 @@ func (db *Mongodb) GetUserByLogin(ctx context.Context, login string) (models.Use
 	coll := db.client.Database(dbName).Collection(collUsers)
 	err := coll.FindOne(ctx,
 		bson.D{
-			{"login", login},
-			{"state", models.StateActive},
+			{Key: "login", Value: login},
+			{Key: "state", Value: models.StateActive},
 		}).Decode(&user)
 	if err != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {

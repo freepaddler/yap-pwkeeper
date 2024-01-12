@@ -14,7 +14,7 @@ func (db *Mongodb) GetSerials(ctx context.Context, n int) (int64, error) {
 	coll := db.client.Database(dbName).Collection(collSerials)
 	filter := bson.D{}
 	update := bson.D{
-		{"$inc", bson.D{{"next", int64(n)}}},
+		{Key: "$inc", Value: bson.D{{Key: "next", Value: int64(n)}}},
 	}
 	opts := options.FindOneAndUpdate().SetUpsert(true)
 	var res bson.M

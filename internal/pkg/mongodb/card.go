@@ -32,8 +32,8 @@ func (db *Mongodb) GetCard(ctx context.Context, docId string, userId string) (mo
 		return card, err
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", userId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: userId},
 	}
 	if err := coll.FindOne(ctx, filter).Decode(&card); err != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
@@ -60,8 +60,8 @@ func (db *Mongodb) ModifyCard(ctx context.Context, card models.Card) error {
 		Card: card,
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", card.UserId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: card.UserId},
 	}
 	var result interface{}
 	err = coll.FindOneAndReplace(ctx, filter, newCard).Decode(&result)
@@ -75,9 +75,9 @@ func (db *Mongodb) ModifyCard(ctx context.Context, card models.Card) error {
 func (db *Mongodb) GetCardsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collCards)
 	filter := bson.D{
-		{"user_id", userId},
-		{"serial", bson.D{{"$gt", minSerial}}},
-		{"serial", bson.D{{"$lt", maxSerial}}},
+		{Key: "user_id", Value: userId},
+		{Key: "serial", Value: bson.D{{Key: "$gt", Value: minSerial}}},
+		{Key: "serial", Value: bson.D{{Key: "$lt", Value: maxSerial}}},
 	}
 	cursor, err := coll.Find(ctx, filter)
 	if err != nil {

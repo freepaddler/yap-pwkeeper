@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
+	github.com/brianvoe/gofakeit/v6 v6.26.4
 	github.com/gdamore/tcell/v2 v2.7.0
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/golang/mock v1.6.0

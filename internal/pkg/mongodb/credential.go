@@ -32,8 +32,8 @@ func (db *Mongodb) GetCredential(ctx context.Context, docId string, userId strin
 		return credential, err
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", userId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: userId},
 	}
 	if err := coll.FindOne(ctx, filter).Decode(&credential); err != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
@@ -60,8 +60,8 @@ func (db *Mongodb) ModifyCredential(ctx context.Context, credential models.Crede
 		Credential: credential,
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", credential.UserId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: credential.UserId},
 	}
 	var result interface{}
 	err = coll.FindOneAndReplace(ctx, filter, newCredential).Decode(&result)
@@ -75,9 +75,9 @@ func (db *Mongodb) ModifyCredential(ctx context.Context, credential models.Crede
 func (db *Mongodb) GetCredentialsStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collCredentials)
 	filter := bson.D{
-		{"user_id", userId},
-		{"serial", bson.D{{"$gt", minSerial}}},
-		{"serial", bson.D{{"$lt", maxSerial}}},
+		{Key: "user_id", Value: userId},
+		{Key: "serial", Value: bson.D{{Key: "$gt", Value: minSerial}}},
+		{Key: "serial", Value: bson.D{{Key: "$lt", Value: maxSerial}}},
 	}
 	cursor, err := coll.Find(ctx, filter)
 	if err != nil {

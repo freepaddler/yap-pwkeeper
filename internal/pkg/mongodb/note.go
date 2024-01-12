@@ -32,8 +32,8 @@ func (db *Mongodb) GetNote(ctx context.Context, docId string, userId string) (mo
 		return note, err
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", userId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: userId},
 	}
 	if err := coll.FindOne(ctx, filter).Decode(&note); err != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
@@ -60,8 +60,8 @@ func (db *Mongodb) ModifyNote(ctx context.Context, note models.Note) error {
 		Note: note,
 	}
 	filter := bson.D{
-		{"_id", id},
-		{"user_id", note.UserId},
+		{Key: "_id", Value: id},
+		{Key: "user_id", Value: note.UserId},
 	}
 	var result interface{}
 	err = coll.FindOneAndReplace(ctx, filter, newNote).Decode(&result)
@@ -75,9 +75,9 @@ func (db *Mongodb) ModifyNote(ctx context.Context, note models.Note) error {
 func (db *Mongodb) GetNotesStream(ctx context.Context, userId string, minSerial, maxSerial int64, chData chan interface{}) error {
 	coll := db.client.Database(dbName).Collection(collNotes)
 	filter := bson.D{
-		{"user_id", userId},
-		{"serial", bson.D{{"$gt", minSerial}}},
-		{"serial", bson.D{{"$lt", maxSerial}}},
+		{Key: "user_id", Value: userId},
+		{Key: "serial", Value: bson.D{{Key: "$gt", Value: minSerial}}},
+		{Key: "serial", Value: bson.D{{Key: "$lt", Value: maxSerial}}},
 	}
 	cursor, err := coll.Find(ctx, filter)
 	if err != nil {
